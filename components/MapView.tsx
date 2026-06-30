@@ -13,14 +13,17 @@ interface Props {
   phase: Phase;
   activeId: string | null;
   isMobile?: boolean;
+  userLat?: number;
+  userLng?: number;
   onPinClick: (p: Pharmacy) => void;
   onPinEnter: (id: string) => void;
   onPinLeave: (id: string) => void;
   onRecenter?: () => void;
 }
 
-const USER_LAT = 37.4979;
-const USER_LNG = 127.0276;
+// Fallback to Gangnam area when no real coords provided
+const FALLBACK_LAT = 37.4979;
+const FALLBACK_LNG = 127.0276;
 
 // Applied only to Kakao's tile layer elements (captured before our overlays are added).
 // grayscale removes Kakao's colorful palette → invert flips light/dark →
@@ -118,6 +121,8 @@ export default function MapView({
   phase,
   activeId,
   isMobile = false,
+  userLat,
+  userLng,
   onPinClick,
   onPinEnter,
   onPinLeave,
@@ -137,11 +142,14 @@ export default function MapView({
 
     function startMap() {
       if (!mounted || !containerRef.current) return;
+      const lat = userLat ?? FALLBACK_LAT;
+      const lng = userLng ?? FALLBACK_LNG;
+
       window.kakao.maps.load(() => {
         if (!mounted || !containerRef.current) return;
 
         const map = new window.kakao.maps.Map(containerRef.current, {
-          center: new window.kakao.maps.LatLng(USER_LAT, USER_LNG),
+          center: new window.kakao.maps.LatLng(lat, lng),
           level: 4,
         });
         mapRef.current = map;
@@ -175,7 +183,7 @@ export default function MapView({
         myDot.appendChild(dot);
 
         new window.kakao.maps.CustomOverlay({
-          position: new window.kakao.maps.LatLng(USER_LAT, USER_LNG),
+          position: new window.kakao.maps.LatLng(lat, lng),
           content: myDot,
           xAnchor: 0.5,
           yAnchor: 0.5,
@@ -257,7 +265,9 @@ export default function MapView({
 
   function handleRecenter() {
     onRecenter?.();
-    mapRef.current?.setCenter(new window.kakao.maps.LatLng(USER_LAT, USER_LNG));
+    const lat = userLat ?? FALLBACK_LAT;
+    const lng = userLng ?? FALLBACK_LNG;
+    mapRef.current?.setCenter(new window.kakao.maps.LatLng(lat, lng));
   }
 
   const recenterBottom = isMobile ? "54%" : 26;

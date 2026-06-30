@@ -14,6 +14,7 @@ import Toast from "@/components/Toast";
 import SearchOverlay from "@/components/SearchOverlay";
 import FilterSheet from "@/components/FilterSheet";
 import DevNav from "@/components/DevNav";
+import { requestLocation, type Coords } from "@/lib/geolocation";
 
 export type Phase = "scan" | "located" | "listed";
 export type AppState = "permission" | "denied" | "error" | "loaded";
@@ -56,6 +57,8 @@ export default function Home() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeChip, setActiveChip] = useState(0);
+  const [userCoords, setUserCoords] = useState<Coords | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const activeId = detailId ?? hoveredId;
@@ -92,6 +95,25 @@ export default function Home() {
     setAppState("loaded");
   }
 
+  async function handleAllow() {
+    setIsLocating(true);
+    try {
+      const coords = await requestLocation();
+      setUserCoords(coords);
+      startScan();
+    } catch {
+      showToast("위치를 가져올 수 없어요. 지역을 직접 선택해 주세요.");
+      setAppState("denied");
+    } finally {
+      setIsLocating(false);
+    }
+  }
+
+  function handleRegionConfirm(coords: Coords) {
+    setUserCoords(coords);
+    startScan();
+  }
+
   function switchState(s: AppState) {
     setDetailId(null);
     setHoveredId(null);
@@ -121,12 +143,13 @@ export default function Home() {
         <MapBackground />
         {appState === "permission" && (
           <LocationPermission
-            onAllow={startScan}
+            onAllow={handleAllow}
             onManual={() => setAppState("denied")}
+            isLocating={isLocating}
           />
         )}
         {appState === "denied" && (
-          <RegionSelect onConfirm={startScan} onRetry={startScan} />
+          <RegionSelect onConfirm={handleRegionConfirm} onRetry={handleAllow} />
         )}
         {appState === "error" && (
           <ErrorScreen onRetry={startScan} />
@@ -148,6 +171,8 @@ export default function Home() {
           phase={phase}
           activeId={activeId}
           isMobile
+          userLat={userCoords?.lat}
+          userLng={userCoords?.lng}
           onPinClick={handleCardClick}
           onPinEnter={handleHoverEnter}
           onPinLeave={handleHoverLeave}
@@ -208,6 +233,8 @@ export default function Home() {
         pharmacies={MOCK_PHARMACIES}
         phase={phase}
         activeId={activeId}
+        userLat={userCoords?.lat}
+        userLng={userCoords?.lng}
         onPinClick={handleCardClick}
         onPinEnter={handleHoverEnter}
         onPinLeave={handleHoverLeave}

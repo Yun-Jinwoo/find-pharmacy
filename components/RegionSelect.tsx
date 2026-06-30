@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { regionToCoords } from "@/lib/geolocation";
 
 interface Props {
-  onConfirm: () => void;
+  onConfirm: (coords: { lat: number; lng: number }) => void;
   onRetry: () => void;
 }
 
@@ -112,7 +113,7 @@ export default function RegionSelect({ onConfirm, onRetry }: Props) {
             위치 다시 허용
           </button>
           <button
-            onClick={onConfirm}
+            onClick={() => onConfirm(regionToCoords(region))}
             className="flex-1 h-[48px] border-0 rounded-[11px] font-extrabold text-white cursor-pointer"
             style={{
               fontSize: 14,

@@ -3,9 +3,10 @@
 interface Props {
   onAllow: () => void;
   onManual: () => void;
+  isLocating?: boolean;
 }
 
-export default function LocationPermission({ onAllow, onManual }: Props) {
+export default function LocationPermission({ onAllow, onManual, isLocating = false }: Props) {
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center px-6">
       <div
@@ -82,14 +83,27 @@ export default function LocationPermission({ onAllow, onManual }: Props) {
 
         <button
           onClick={onAllow}
-          className="w-full h-[52px] rounded-[13px] border-0 font-extrabold text-white cursor-pointer"
+          disabled={isLocating}
+          className="w-full h-[52px] rounded-[13px] border-0 font-extrabold text-white cursor-pointer flex items-center justify-center gap-[8px]"
           style={{
             fontSize: 15.5,
             background: "linear-gradient(135deg, #0B8FAC, #086B82)",
             boxShadow: "0 14px 28px -14px rgba(11,143,172,0.9)",
+            opacity: isLocating ? 0.8 : 1,
           }}
         >
-          위치 허용
+          {isLocating ? (
+            <>
+              <svg
+                width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="white" strokeWidth="2.5" strokeLinecap="round"
+                style={{ animation: "spin 0.9s linear infinite", flexShrink: 0 }}
+              >
+                <path d="M12 2a10 10 0 0 1 10 10" />
+              </svg>
+              위치 확인 중…
+            </>
+          ) : "위치 허용"}
         </button>
         <button
           onClick={onManual}
