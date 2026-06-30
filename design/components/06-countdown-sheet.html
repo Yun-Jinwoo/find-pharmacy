@@ -1,0 +1,28 @@
+<!-- @dsCard group="Components" name="운영 카운트다운 & 시트 헤더" subtitle="마감 안내 카드 + 바텀시트 핸들" width="440" height="360" -->
+<title>Countdown & Sheet</title>
+<style>
+  :root{--ink:#0E2A33;--muted:#5E7C88;--line:#E4EDF1;--primary:#0B8FAC;
+    --open:#16A34A;--closing:#EA9006;--closed:#94A3B8;
+    --font:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:var(--font);background:#E8EFF2;padding:26px;display:flex;flex-direction:column;gap:16px}
+  .cd{border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:11px;border:1px solid}
+  .cd .ic{width:34px;height:34px;border-radius:10px;color:#fff;display:grid;place-items:center;flex:none}
+  .cd b{font-size:14px}.cd small{display:block;font-size:12px;margin-top:2px}
+  .open{background:rgba(22,163,74,.09);border-color:rgba(22,163,74,.18)}.open .ic{background:var(--open)}.open b{color:#137a3a}.open small{color:#5f8a70}
+  .cl{background:rgba(234,144,6,.1);border-color:rgba(234,144,6,.22)}.cl .ic{background:var(--closing)}.cl b{color:#b06d04}.cl small{color:#9c7322}
+  .cd2{background:#f1f4f6;border-color:var(--line)}.cd2 .ic{background:var(--closed)}.cd2 b{color:#5f7178}.cd2 small{color:#7d909b}
+  .sheet{background:#fff;border:1px solid var(--line);border-radius:26px 26px 0 0;padding-bottom:14px;box-shadow:0 -10px 30px -22px rgba(8,53,66,.4)}
+  .grip{padding:11px 0 8px;display:flex;justify-content:center}
+  .grip span{width:42px;height:5px;border-radius:99px;background:#d3dfe4}
+  .sh{padding:2px 20px 14px}
+  .sh h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px}.sh h1 em{color:var(--primary);font-style:normal}
+  .sh p{margin:5px 0 0;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .livedot{width:7px;height:7px;border-radius:50%;background:var(--open);animation:beat 1.8s infinite}
+  @keyframes beat{0%{box-shadow:0 0 0 0 rgba(22,163,74,.5)}70%{box-shadow:0 0 0 7px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+  .icw{display:flex}
+</style>
+<div class="cd open"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><b>밤 10:00까지 운영</b><small>마감까지 약 19분 남았어요</small></div></div>
+<div class="cd cl"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><b>밤 10:00 마감 예정</b><small>마감 임박 · 서둘러 주세요</small></div></div>
+<div class="cd cd2"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><b>오늘 영업 종료</b><small>내일 오전 9시에 다시 열어요</small></div></div>
+<div class="sheet"><div class="grip"><span></span></div><div class="sh"><h1>주변 운영 중 약국 <em>4곳</em></h1><p><span class="livedot"></span>밤 9:41 기준 · 가까운 순</p></div></div>

@@ -1,0 +1,29 @@
+<!-- @dsCard group="Components" name="버튼 & 칩" subtitle="길찾기 · 전화 · 필터칩" width="520" height="300" -->
+<title>Buttons & Chips</title>
+<style>
+  :root{--ink:#0E2A33;--line:#E4EDF1;--primary:#0B8FAC;--primary-deep:#086B82;
+    --font:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:var(--font);background:#E8EFF2;padding:28px;display:flex;flex-direction:column;gap:18px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .lab{font-size:11px;color:#90a6af;letter-spacing:.6px;text-transform:uppercase;width:100%;margin-bottom:-6px}
+  button{border:0;font:inherit;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s,filter .2s}
+  button:active{transform:scale(.96)}
+  .nav{background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;font-size:15px;padding:14px 22px;border-radius:14px;box-shadow:0 12px 26px -12px rgba(11,143,172,.8)}
+  .nav:hover{filter:brightness(1.06)}
+  .call{background:#eef4f6;color:var(--primary-deep);font-size:14px;padding:13px 18px;border-radius:13px}
+  .icon{width:48px;height:48px;border-radius:14px;background:#fff;color:var(--primary);box-shadow:0 8px 20px -10px rgba(8,53,66,.5)}
+  .chip{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#f0f5f7;color:#3a5560}
+  .chip.on{background:var(--primary);color:#fff}
+</style>
+<div class="row"><span class="lab">Primary / Secondary</span>
+  <button class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2Z"/></svg>길찾기</button>
+  <button class="call"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>전화</button>
+  <button class="icon" aria-label="내 위치"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke-linecap="round"/></svg></button>
+</div>
+<div class="row"><span class="lab">Filter Chips</span>
+  <button class="chip on">운영 중</button>
+  <button class="chip">심야 운영</button>
+  <button class="chip">공휴일</button>
+  <button class="chip">연중무휴</button>
+</div>

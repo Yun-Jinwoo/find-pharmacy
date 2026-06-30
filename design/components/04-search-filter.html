@@ -1,0 +1,25 @@
+<!-- @dsCard group="Components" name="검색바 + 필터" subtitle="지역·약국 검색 + 운영 조건 칩" width="460" height="200" -->
+<title>Search & Filter</title>
+<style>
+  :root{--ink:#0E2A33;--line:#E4EDF1;--primary:#0B8FAC;
+    --font:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:var(--font);background:#E8EFF2;padding:26px}
+  .search{background:#fff;border:1px solid var(--line);border-radius:14px;height:50px;display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:0 10px 24px -14px rgba(8,53,66,.4)}
+  .search:focus-within{border-color:var(--primary)}
+  .search input{border:0;outline:0;font:inherit;font-size:15px;color:var(--ink);width:100%;background:none}
+  .search input::placeholder{color:#9fb3bc}
+  .chips{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+  .chip{font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#fff;color:#3a5560;border:1px solid var(--line);cursor:pointer}
+  .chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+</style>
+<div class="search">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+  <input placeholder="지역 · 약국 이름 검색" aria-label="검색">
+</div>
+<div class="chips">
+  <button class="chip on">운영 중</button>
+  <button class="chip">심야 운영</button>
+  <button class="chip">공휴일</button>
+  <button class="chip">연중무휴</button>
+</div>

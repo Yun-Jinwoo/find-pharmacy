@@ -1,0 +1,47 @@
+<!-- @dsCard group="Components" name="약국 카드" subtitle="운영중 / 곧 마감 / 종료 상태" width="420" height="430" -->
+<title>Pharmacy Card</title>
+<style>
+  :root{--ink:#0E2A33;--muted:#5E7C88;--line:#E4EDF1;--primary:#0B8FAC;--primary-deep:#086B82;
+    --open:#16A34A;--closing:#EA9006;--closed:#94A3B8;
+    --font:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:var(--font);background:#E8EFF2;padding:24px;display:flex;flex-direction:column;gap:12px}
+  .card{display:flex;gap:13px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;transition:box-shadow .2s,border-color .2s}
+  .card:hover{box-shadow:0 12px 26px -16px rgba(8,53,66,.4);border-color:#cfe1e7}
+  .badge{flex:none;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:rgba(11,143,172,.1);color:var(--primary)}
+  .cbody{flex:1;min-width:0}
+  .crow{display:flex;align-items:center;gap:8px}
+  .cname{font-size:16px;font-weight:700;letter-spacing:-.3px}
+  .status{flex:none;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+  .status .d{width:6px;height:6px;border-radius:50%}
+  .open{background:rgba(22,163,74,.12);color:#137a3a}.open .d{background:var(--open);animation:beat 1.8s infinite}
+  .closing{background:rgba(234,144,6,.14);color:#b06d04}.closing .d{background:var(--closing)}
+  .closed{background:#eef2f4;color:#6b7f88}.closed .d{background:var(--closed)}
+  @keyframes beat{0%{box-shadow:0 0 0 0 rgba(22,163,74,.5)}70%{box-shadow:0 0 0 7px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+  .cmeta{margin-top:5px;font-size:13px;color:#3a5560}
+  .dist{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .km{font-size:16px;font-weight:800;color:var(--primary-deep);font-variant-numeric:tabular-nums}
+  .walk{font-size:11px;color:#9fb3bc}
+  .mini{display:flex;gap:8px;margin-top:11px}
+  .mini button{flex:1;border:0;font:inherit;font-size:13px;font-weight:700;padding:9px;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .mini .call{background:#eef4f6;color:var(--primary-deep)}.mini .nav{background:var(--primary);color:#fff}
+</style>
+<div class="card">
+  <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a3 3 0 0 1 6 0v2M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M12 11v6M9 14h6"/></svg></div>
+  <div class="cbody"><div class="crow"><span class="cname">온누리약국</span><span class="status open"><span class="d"></span>운영 중</span></div>
+    <div class="cmeta">밤 10:00까지</div>
+    <div class="mini"><button class="call">전화</button><button class="nav">길찾기</button></div></div>
+  <div class="dist"><span class="km">320m</span><span class="walk">도보 5분</span></div>
+</div>
+<div class="card">
+  <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M12 11v6M9 14h6"/></svg></div>
+  <div class="cbody"><div class="crow"><span class="cname">행복한약국</span><span class="status closing"><span class="d"></span>곧 마감</span></div>
+    <div class="cmeta">밤 10:00까지</div></div>
+  <div class="dist"><span class="km">1.1km</span><span class="walk">도보 14분</span></div>
+</div>
+<div class="card" style="opacity:.85">
+  <div class="badge" style="background:#eef2f4;color:#94a3b8"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/></svg></div>
+  <div class="cbody"><div class="crow"><span class="cname">건강샘약국</span><span class="status closed"><span class="d"></span>영업 종료</span></div>
+    <div class="cmeta">내일 09:00 오픈</div></div>
+  <div class="dist"><span class="km">1.4km</span><span class="walk">도보 18분</span></div>
+</div>

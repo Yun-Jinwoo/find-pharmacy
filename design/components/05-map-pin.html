@@ -1,0 +1,24 @@
+<!-- @dsCard group="Components" name="지도 핀 & 내 위치" subtitle="상태별 마커 + 현재 위치 소나" width="460" height="280" -->
+<title>Map Pin</title>
+<style>
+  :root{--primary:#0B8FAC;--primary-deep:#086B82;--accent:#22D3EE;--map:#0C2A33;
+    --font:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:var(--font);background:var(--map);padding:34px;display:flex;gap:42px;align-items:center;justify-content:center;min-height:100%}
+  .item{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .lbl{color:#9fc7d2;font-size:12px;font-weight:600}
+  .pin{position:relative}
+  .head{width:38px;height:38px;border-radius:50% 50% 50% 3px;transform:rotate(45deg);display:grid;place-items:center;box-shadow:0 8px 18px -4px rgba(0,0,0,.6)}
+  .head b{transform:rotate(-45deg);color:#fff;font-size:15px;font-weight:800}
+  .s-open .head{background:linear-gradient(135deg,#1fb257,#138a43)}
+  .s-closing .head{background:linear-gradient(135deg,#f6a722,#e08a06)}
+  .s-closed .head{background:linear-gradient(135deg,#9fb0bb,#7d909b)}
+  .me{position:relative;width:22px;height:22px}
+  .me .dot{width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 5px rgba(34,211,238,.22);position:relative;z-index:2}
+  .me .ring{position:absolute;left:50%;top:50%;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:rgba(34,211,238,.32);animation:sonar 2.4s ease-out infinite}
+  @keyframes sonar{0%{opacity:.7;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(5)}}
+</style>
+<div class="item"><div class="pin s-open"><div class="head"><b>약</b></div></div><span class="lbl">운영 중</span></div>
+<div class="item"><div class="pin s-closing"><div class="head"><b>약</b></div></div><span class="lbl">곧 마감</span></div>
+<div class="item"><div class="pin s-closed"><div class="head"><b>약</b></div></div><span class="lbl">영업 종료</span></div>
+<div class="item"><div class="me"><span class="ring"></span><span class="dot"></span></div><span class="lbl">내 위치</span></div>

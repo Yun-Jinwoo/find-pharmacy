@@ -1,0 +1,51 @@
+<!-- @dsCard group="Foundations" name="디자인 토큰" subtitle="컬러 · 타이포 · 라운드" width="920" height="560" -->
+<title>Foundations · 약국 어디가</title>
+<style>
+  :root{
+    --bg:#E8EFF2;--ink:#0E2A33;--muted:#5E7C88;--line:#E4EDF1;--card:#fff;
+    --primary:#0B8FAC;--primary-deep:#086B82;--accent:#22D3EE;--map:#0C2A33;
+    --open:#16A34A;--closing:#EA9006;--closed:#94A3B8;
+    --font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);padding:28px}
+  h4{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#90a6af;margin:0 0 12px}
+  .sec{margin-bottom:26px}
+  .sw{display:flex;gap:12px;flex-wrap:wrap}
+  .chipc{width:128px;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .chipc .clr{height:62px}.chipc .meta{padding:8px 10px}
+  .chipc .nm{font-size:12.5px;font-weight:700}.chipc .hex{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:1px}
+  .type{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+  .type .row{display:flex;align-items:baseline;gap:14px;border-bottom:1px dashed var(--line);padding-bottom:11px}
+  .type .row:last-child{border:0;padding:0}
+  .type .lab{width:120px;font-size:11px;color:var(--muted);flex:none}
+  .d1{font-size:25px;font-weight:800;letter-spacing:-.6px}.d2{font-size:19px;font-weight:800;letter-spacing:-.4px}
+  .b1{font-size:15px}.lb{font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--primary-deep)}
+  .da{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--primary-deep)}
+  .rads{display:flex;gap:14px;align-items:flex-end}
+  .rad{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+  .rad i{display:block;width:62px;height:48px;background:#fff;border:1px solid var(--line)}
+</style>
+<div class="sec"><h4>Color</h4><div class="sw">
+  <div class="chipc"><div class="clr" style="background:var(--primary)"></div><div class="meta"><div class="nm">Primary</div><div class="hex">#0B8FAC</div></div></div>
+  <div class="chipc"><div class="clr" style="background:var(--primary-deep)"></div><div class="meta"><div class="nm">Primary Deep</div><div class="hex">#086B82</div></div></div>
+  <div class="chipc"><div class="clr" style="background:var(--accent)"></div><div class="meta"><div class="nm">Accent</div><div class="hex">#22D3EE</div></div></div>
+  <div class="chipc"><div class="clr" style="background:var(--map)"></div><div class="meta"><div class="nm">Map BG</div><div class="hex">#0C2A33</div></div></div>
+  <div class="chipc"><div class="clr" style="background:var(--open)"></div><div class="meta"><div class="nm">운영중</div><div class="hex">#16A34A</div></div></div>
+  <div class="chipc"><div class="clr" style="background:var(--closing)"></div><div class="meta"><div class="nm">곧 마감</div><div class="hex">#EA9006</div></div></div>
+  <div class="chipc"><div class="clr" style="background:var(--closed)"></div><div class="meta"><div class="nm">영업종료</div><div class="hex">#94A3B8</div></div></div>
+  <div class="chipc"><div class="clr" style="background:var(--ink)"></div><div class="meta"><div class="nm">Ink</div><div class="hex">#0E2A33</div></div></div>
+</div></div>
+<div class="sec"><h4>Typography — 시스템 한글 스택(Pretendard 폴백)</h4><div class="type">
+  <div class="row"><span class="lab">Display / 25·800</span><span class="d1">주변 운영 중 약국 4곳</span></div>
+  <div class="row"><span class="lab">Heading / 19·800</span><span class="d2">온누리약국</span></div>
+  <div class="row"><span class="lab">Body / 15·400</span><span class="b1">밤 10:00까지 운영 · 처방조제 가능</span></div>
+  <div class="row"><span class="lab">Label / 11.5·700</span><span class="lb">운영 시간</span></div>
+  <div class="row"><span class="lab">Data / 16·800 tab</span><span class="da">320m · 도보 5분</span></div>
+</div></div>
+<div class="sec"><h4>Radius</h4><div class="rads">
+  <div class="rad"><i style="border-radius:11px"></i>11 · 버튼</div>
+  <div class="rad"><i style="border-radius:15px"></i>15 · 카드</div>
+  <div class="rad"><i style="border-radius:26px 26px 0 0"></i>26 · 시트</div>
+  <div class="rad"><i style="border-radius:999px"></i>full · 칩/뱃지</div>
+</div></div>
