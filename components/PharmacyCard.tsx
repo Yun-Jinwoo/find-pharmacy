@@ -11,6 +11,8 @@ interface Props {
   index: number;
   isActive: boolean;
   phase: Phase;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
   showActions?: boolean;
   showToast?: (msg: string) => void;
   onClick: () => void;
@@ -18,11 +20,28 @@ interface Props {
   onMouseLeave: () => void;
 }
 
+function HeartIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      width="18" height="18" viewBox="0 0 24 24"
+      fill={filled ? "#ef4444" : "none"}
+      stroke={filled ? "#ef4444" : "#94a3b8"}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  );
+}
+
 export default function PharmacyCard({
   pharmacy,
   index,
   isActive,
   phase,
+  isFavorite = false,
+  onToggleFavorite,
   showActions = false,
   showToast,
   onClick,
@@ -66,12 +85,23 @@ export default function PharmacyCard({
   if (showActions) {
     return (
       <div
-        className="flex gap-[13px] items-start border rounded-[16px] mb-[11px] cursor-pointer"
+        className="relative flex gap-[13px] items-start border rounded-[16px] mb-[11px] cursor-pointer"
         style={{ padding: "14px", ...baseStyle }}
         onClick={onClick}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
+        {/* favorite button — top-right overlay */}
+        {onToggleFavorite && (
+          <button
+            className="absolute border-0 bg-transparent cursor-pointer p-[6px]"
+            style={{ top: 8, right: 8 }}
+            onClick={e => { e.stopPropagation(); onToggleFavorite(); }}
+          >
+            <HeartIcon filled={isFavorite} />
+          </button>
+        )}
+
         {/* icon */}
         <div
           className="flex-none grid place-items-center rounded-[13px]"
@@ -88,22 +118,16 @@ export default function PharmacyCard({
           </svg>
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0" style={{ paddingRight: 28 }}>
           <div className="flex items-center gap-[8px] flex-wrap">
-            <span
-              className="font-bold tracking-[-0.3px] truncate"
-              style={{ fontSize: 16 }}
-            >
+            <span className="font-bold tracking-[-0.3px] truncate" style={{ fontSize: 16 }}>
               {pharmacy.name}
             </span>
             <StatusBadge status={pharmacy.status} label={pharmacy.statusLabel} />
           </div>
           <div className="flex items-center justify-between mt-[5px]">
             <span style={{ fontSize: 13, color: "#3a5560" }}>{pharmacy.hoursToday}</span>
-            <span
-              className="font-extrabold flex-none ml-[8px]"
-              style={{ fontSize: 16, color: "var(--primary-deep)", fontVariantNumeric: "tabular-nums" }}
-            >
+            <span className="font-extrabold flex-none ml-[8px]" style={{ fontSize: 16, color: "var(--primary-deep)", fontVariantNumeric: "tabular-nums" }}>
               <span ref={kmRef}>0m</span>
               <small style={{ fontSize: 11, color: "#9fb3bc", fontWeight: 500, marginLeft: 5 }}>
                 {pharmacy.walkTime}
@@ -152,6 +176,14 @@ export default function PharmacyCard({
           {pharmacy.name}
         </span>
         <StatusBadge status={pharmacy.status} label={pharmacy.statusLabel} />
+        {onToggleFavorite && (
+          <button
+            className="ml-auto border-0 bg-transparent cursor-pointer flex-none p-[4px]"
+            onClick={e => { e.stopPropagation(); onToggleFavorite(); }}
+          >
+            <HeartIcon filled={isFavorite} />
+          </button>
+        )}
       </div>
       <div className="flex items-start justify-between mt-[6px] gap-[8px]">
         <div className="min-w-0">
@@ -160,10 +192,7 @@ export default function PharmacyCard({
             <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>{pharmacy.subText}</div>
           )}
         </div>
-        <span
-          className="font-extrabold flex-none"
-          style={{ fontSize: 15, color: "var(--primary-deep)", fontVariantNumeric: "tabular-nums" }}
-        >
+        <span className="font-extrabold flex-none" style={{ fontSize: 15, color: "var(--primary-deep)", fontVariantNumeric: "tabular-nums" }}>
           <span ref={kmRef}>0m</span>
           <small style={{ fontSize: 11, color: "#9fb3bc", fontWeight: 600, marginLeft: 6 }}>
             {pharmacy.walkTime}
