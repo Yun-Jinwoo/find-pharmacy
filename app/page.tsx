@@ -67,6 +67,9 @@ export default function Home() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
   const [regionName, setRegionName] = useState("");
+  const [mapKey, setMapKey] = useState(0);
+  const [movedCenter, setMovedCenter] = useState<Coords | null>(null);
+  const [animKey, setAnimKey] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -98,15 +101,15 @@ export default function Home() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // phase timer — runs when app becomes "loaded"
+  // phase timer — fires on every scan start (first load + re-search)
   useEffect(() => {
-    if (appState !== "loaded") return;
+    if (animKey === 0) return;
     const prefersReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) { setPhase("listed"); return; }
     const t1 = setTimeout(() => setPhase("located"), 1500);
     const t2 = setTimeout(() => setPhase("listed"), 2050);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [appState]);
+  }, [animKey]);
 
   const showToast = useCallback((msg: string) => {
     setToastMsg(msg);
@@ -117,10 +120,12 @@ export default function Home() {
   function startScan() {
     setPhase("scan");
     setAppState("loaded");
+    setAnimKey(k => k + 1);
   }
 
   async function loadAndStart(coords: Coords) {
     setUserCoords(coords);
+    setMovedCenter(null);
     try {
       const data = await fetchNearbyPharmacies(coords.lat, coords.lng);
       setPharmacies(data.length > 0 ? data : MOCK_PHARMACIES);
@@ -128,6 +133,7 @@ export default function Home() {
       setPharmacies(MOCK_PHARMACIES);
       showToast("약국 데이터를 불러오지 못했어요. 샘플 데이터를 표시합니다.");
     }
+    setMapKey(k => k + 1);
     startScan();
     // Reverse geocoding runs after SDK is ready (MapView loads it after startScan)
     reverseGeocode(coords.lat, coords.lng).then(name => {
@@ -185,6 +191,15 @@ export default function Home() {
     setFilterRadius(opts.radius);
   }
 
+  function handleMapMove(lat: number, lng: number) {
+    if (phase === "listed") setMovedCenter({ lat, lng });
+  }
+
+  async function handleResearch() {
+    if (!movedCenter) return;
+    await loadAndStart(movedCenter);
+  }
+
   function handleToggleFavorite(id: string) {
     setFavorites(prev => {
       const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
@@ -225,6 +240,7 @@ export default function Home() {
     return (
       <main className="relative h-screen overflow-hidden">
         <MapView
+          key={mapKey}
           pharmacies={pharmacies}
           phase={phase}
           activeId={activeId}
@@ -235,7 +251,28 @@ export default function Home() {
           onPinEnter={handleHoverEnter}
           onPinLeave={handleHoverLeave}
           onRecenter={() => showToast("현재 위치로 이동했어요")}
+          onMapMove={handleMapMove}
         />
+        {movedCenter && (
+          <button
+            onClick={handleResearch}
+            className="absolute left-1/2 z-[29] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
+            style={{
+              top: 110,
+              transform: "translateX(-50%)",
+              padding: "11px 20px",
+              fontSize: 14,
+              background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
+              boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
+              animation: "fadeIn 0.25s ease",
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
+            </svg>
+            이 위치에서 재검색
+          </button>
+        )}
         <MobileTopBar
           phase={phase}
           activeChip={activeChip}
@@ -305,17 +342,41 @@ export default function Home() {
         onFilterClick={() => setFilterOpen(true)}
         showToast={showToast}
       />
-      <MapView
-        pharmacies={pharmacies}
-        phase={phase}
-        activeId={activeId}
-        userLat={userCoords?.lat}
-        userLng={userCoords?.lng}
-        onPinClick={handleCardClick}
-        onPinEnter={handleHoverEnter}
-        onPinLeave={handleHoverLeave}
-        onRecenter={() => showToast("현재 위치로 이동했어요")}
-      />
+      <div className="relative">
+        <MapView
+          key={mapKey}
+          pharmacies={pharmacies}
+          phase={phase}
+          activeId={activeId}
+          userLat={userCoords?.lat}
+          userLng={userCoords?.lng}
+          onPinClick={handleCardClick}
+          onPinEnter={handleHoverEnter}
+          onPinLeave={handleHoverLeave}
+          onRecenter={() => showToast("현재 위치로 이동했어요")}
+          onMapMove={handleMapMove}
+        />
+        {movedCenter && (
+          <button
+            onClick={handleResearch}
+            className="absolute left-1/2 z-[10] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
+            style={{
+              top: 20,
+              transform: "translateX(-50%)",
+              padding: "11px 20px",
+              fontSize: 14,
+              background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
+              boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
+              animation: "fadeIn 0.25s ease",
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
+            </svg>
+            이 위치에서 재검색
+          </button>
+        )}
+      </div>
       <Toast message={toastMsg} />
       {searchOpen && (
         <SearchOverlay

@@ -19,6 +19,7 @@ interface Props {
   onPinEnter: (id: string) => void;
   onPinLeave: (id: string) => void;
   onRecenter?: () => void;
+  onMapMove?: (lat: number, lng: number) => void;
 }
 
 // Fallback to Gangnam area when no real coords provided
@@ -127,6 +128,7 @@ export default function MapView({
   onPinEnter,
   onPinLeave,
   onRecenter,
+  onMapMove,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -153,6 +155,12 @@ export default function MapView({
           level: 4,
         });
         mapRef.current = map;
+
+        // Notify parent when map is dragged to a new position
+        window.kakao.maps.event.addListener(map, "dragend", () => {
+          const c = map.getCenter();
+          onMapMove?.(c.getLat(), c.getLng());
+        });
 
         // ── Capture Kakao's tile-layer elements BEFORE adding our overlays ──
         // CustomOverlays added via setMap() are direct children of containerRef,
