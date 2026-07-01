@@ -2,6 +2,7 @@
 
 import { Pharmacy } from "@/lib/types";
 import StatusBadge from "./StatusBadge";
+import { callPharmacy, navigateTo } from "@/lib/actions";
 
 interface Props {
   pharmacy: Pharmacy | null;
@@ -147,7 +148,11 @@ export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
           className="w-[54px] h-[50px] rounded-[13px] bg-[#eef4f6] text-[var(--primary-deep)]
             grid place-items-center cursor-pointer border-0 active:scale-95 transition-transform"
           aria-label="전화"
-          onClick={() => showToast?.("전화 연결은 실제 기기에서 작동해요")}
+          onClick={() => {
+            if (!pharmacy) return;
+            const ok = callPharmacy(pharmacy.phone);
+            if (!ok) showToast?.("전화번호 정보가 없어요");
+          }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
@@ -161,7 +166,7 @@ export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
             background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
             boxShadow: "0 12px 26px -12px rgba(11,143,172,0.8)",
           }}
-          onClick={() => showToast?.("카카오·네이버 지도 길찾기로 연결돼요")}
+          onClick={() => pharmacy && navigateTo(pharmacy.name, pharmacy.lat, pharmacy.lng)}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 11l19-9-9 19-2-8-8-2Z" />
