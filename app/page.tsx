@@ -192,7 +192,7 @@ export default function Home() {
   }
 
   function handleMapMove(lat: number, lng: number) {
-    if (phase === "listed") setMovedCenter({ lat, lng });
+    setMovedCenter({ lat, lng });
   }
 
   async function handleResearch() {
@@ -253,7 +253,7 @@ export default function Home() {
           onRecenter={() => showToast("현재 위치로 이동했어요")}
           onMapMove={handleMapMove}
         />
-        {movedCenter && (
+        {movedCenter && phase === "listed" && (
           <button
             onClick={handleResearch}
             className="absolute left-1/2 z-[29] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
@@ -355,7 +355,7 @@ export default function Home() {
         onRecenter={() => showToast("현재 위치로 이동했어요")}
         onMapMove={handleMapMove}
       />
-      {movedCenter && (
+      {movedCenter && phase === "listed" && (
         <button
           onClick={handleResearch}
           className="absolute z-[10] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
