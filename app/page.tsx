@@ -342,41 +342,40 @@ export default function Home() {
         onFilterClick={() => setFilterOpen(true)}
         showToast={showToast}
       />
-      <div className="relative">
-        <MapView
-          key={mapKey}
-          pharmacies={pharmacies}
-          phase={phase}
-          activeId={activeId}
-          userLat={userCoords?.lat}
-          userLng={userCoords?.lng}
-          onPinClick={handleCardClick}
-          onPinEnter={handleHoverEnter}
-          onPinLeave={handleHoverLeave}
-          onRecenter={() => showToast("현재 위치로 이동했어요")}
-          onMapMove={handleMapMove}
-        />
-        {movedCenter && (
-          <button
-            onClick={handleResearch}
-            className="absolute left-1/2 z-[10] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
-            style={{
-              top: 20,
-              transform: "translateX(-50%)",
-              padding: "11px 20px",
-              fontSize: 14,
-              background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
-              boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
-              animation: "fadeIn 0.25s ease",
-            }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-              <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
-            </svg>
-            이 위치에서 재검색
-          </button>
-        )}
-      </div>
+      <MapView
+        key={mapKey}
+        pharmacies={pharmacies}
+        phase={phase}
+        activeId={activeId}
+        userLat={userCoords?.lat}
+        userLng={userCoords?.lng}
+        onPinClick={handleCardClick}
+        onPinEnter={handleHoverEnter}
+        onPinLeave={handleHoverLeave}
+        onRecenter={() => showToast("현재 위치로 이동했어요")}
+        onMapMove={handleMapMove}
+      />
+      {movedCenter && (
+        <button
+          onClick={handleResearch}
+          className="absolute z-[10] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
+          style={{
+            top: 20,
+            left: "calc(206px + 50%)",
+            transform: "translateX(-50%)",
+            padding: "11px 20px",
+            fontSize: 14,
+            background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
+            boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
+            animation: "fadeIn 0.25s ease",
+          }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+            <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
+          </svg>
+          이 위치에서 재검색
+        </button>
+      )}
       <Toast message={toastMsg} />
       {searchOpen && (
         <SearchOverlay
