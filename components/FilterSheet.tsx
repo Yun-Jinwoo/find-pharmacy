@@ -1,25 +1,40 @@
 "use client";
 
 import { useState } from "react";
+import { Pharmacy } from "@/lib/types";
 
 interface Props {
+  pharmacies: Pharmacy[];
+  initialOnlyOpen: boolean;
+  initialRadius: number;
   onClose: () => void;
-  pharmacyCount: number;
+  onApply: (opts: { onlyOpen: boolean; radius: number }) => void;
 }
 
-interface Toggle { label: string; on: boolean }
+export default function FilterSheet({
+  pharmacies,
+  initialOnlyOpen,
+  initialRadius,
+  onClose,
+  onApply,
+}: Props) {
+  const [onlyOpen, setOnlyOpen] = useState(initialOnlyOpen);
+  const [radius, setRadius] = useState(initialRadius);
 
-export default function FilterSheet({ onClose, pharmacyCount }: Props) {
-  const [radius, setRadius] = useState(3);
-  const [toggles, setToggles] = useState<Toggle[]>([
-    { label: "운영 중만 보기", on: true },
-    { label: "심야 운영 (24시)", on: true },
-    { label: "공휴일 운영", on: false },
-    { label: "연중무휴", on: false },
-  ]);
+  const filteredCount = pharmacies.filter(p => {
+    if (onlyOpen && p.status === "closed") return false;
+    if (p.distanceM > radius * 1000) return false;
+    return true;
+  }).length;
 
-  function flip(i: number) {
-    setToggles(prev => prev.map((t, j) => j === i ? { ...t, on: !t.on } : t));
+  function handleConfirm() {
+    onApply({ onlyOpen, radius });
+    onClose();
+  }
+
+  function handleReset() {
+    setOnlyOpen(false);
+    setRadius(10);
   }
 
   return (
@@ -49,10 +64,7 @@ export default function FilterSheet({ onClose, pharmacyCount }: Props) {
         <div className="flex items-center justify-between mb-[14px]">
           <h2 className="m-0" style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.4px" }}>필터</h2>
           <button
-            onClick={() => {
-              setToggles(prev => prev.map(t => ({ ...t, on: false })));
-              setRadius(3);
-            }}
+            onClick={handleReset}
             className="border-0 bg-transparent cursor-pointer font-bold"
             style={{ fontSize: 12.5, color: "var(--muted)" }}
           >
@@ -60,42 +72,37 @@ export default function FilterSheet({ onClose, pharmacyCount }: Props) {
           </button>
         </div>
 
-        {/* toggles */}
-        {toggles.map((t, i) => (
-          <div key={t.label}>
-            <div className="flex items-center justify-between" style={{ padding: "12px 0" }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: t.on ? "var(--ink)" : "var(--muted)" }}>
-                {t.label}
-              </span>
-              <button
-                onClick={() => flip(i)}
-                className="border-0 cursor-pointer relative flex-none"
-                style={{
-                  width: 44,
-                  height: 26,
-                  borderRadius: 999,
-                  background: t.on ? "var(--primary)" : "#d3dfe4",
-                  padding: 0,
-                  transition: "background 0.2s",
-                }}
-              >
-                <span
-                  className="absolute top-[3px] rounded-full bg-white"
-                  style={{
-                    width: 20,
-                    height: 20,
-                    left: t.on ? "calc(100% - 23px)" : 3,
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.25)",
-                    transition: "left 0.2s",
-                  }}
-                />
-              </button>
-            </div>
-            {i < toggles.length - 1 && (
-              <div style={{ height: 1, background: "var(--line)" }} />
-            )}
-          </div>
-        ))}
+        {/* 운영 중만 보기 toggle */}
+        <div className="flex items-center justify-between" style={{ padding: "12px 0" }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: onlyOpen ? "var(--ink)" : "var(--muted)" }}>
+            운영 중만 보기
+          </span>
+          <button
+            onClick={() => setOnlyOpen(v => !v)}
+            className="border-0 cursor-pointer relative flex-none"
+            style={{
+              width: 44,
+              height: 26,
+              borderRadius: 999,
+              background: onlyOpen ? "var(--primary)" : "#d3dfe4",
+              padding: 0,
+              transition: "background 0.2s",
+            }}
+          >
+            <span
+              className="absolute top-[3px] rounded-full bg-white"
+              style={{
+                width: 20,
+                height: 20,
+                left: onlyOpen ? "calc(100% - 23px)" : 3,
+                boxShadow: "0 2px 5px rgba(0,0,0,0.25)",
+                transition: "left 0.2s",
+              }}
+            />
+          </button>
+        </div>
+
+        <div style={{ height: 1, background: "var(--line)" }} />
 
         {/* radius slider */}
         <div style={{ marginTop: 18 }}>
@@ -112,11 +119,7 @@ export default function FilterSheet({ onClose, pharmacyCount }: Props) {
             value={radius}
             onChange={e => setRadius(+e.target.value)}
             className="w-full"
-            style={{
-              accentColor: "var(--primary)",
-              height: 5,
-              cursor: "pointer",
-            }}
+            style={{ accentColor: "var(--primary)", height: 5, cursor: "pointer" }}
           />
           <div className="flex justify-between" style={{ fontSize: 10.5, color: "#9fb3bc", marginTop: 6, fontVariantNumeric: "tabular-nums" }}>
             <span>1km</span><span>10km</span>
@@ -125,7 +128,7 @@ export default function FilterSheet({ onClose, pharmacyCount }: Props) {
 
         {/* confirm */}
         <button
-          onClick={onClose}
+          onClick={handleConfirm}
           className="w-full border-0 rounded-[13px] font-extrabold text-white cursor-pointer flex items-center justify-center"
           style={{
             height: 52,
@@ -135,7 +138,7 @@ export default function FilterSheet({ onClose, pharmacyCount }: Props) {
             boxShadow: "0 12px 26px -12px rgba(11,143,172,0.85)",
           }}
         >
-          약국 {pharmacyCount}곳 보기
+          약국 {filteredCount}곳 보기
         </button>
       </div>
     </>
