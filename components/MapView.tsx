@@ -236,7 +236,7 @@ export default function MapView({
       if (!script) {
         script = document.createElement("script");
         script.id = "kakao-maps-sdk";
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false`;
+        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false&libraries=services`;
         document.head.appendChild(script);
       }
       script.addEventListener("load", startMap);

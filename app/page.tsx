@@ -16,6 +16,7 @@ import SearchOverlay from "@/components/SearchOverlay";
 import FilterSheet from "@/components/FilterSheet";
 import DevNav from "@/components/DevNav";
 import { requestLocation, type Coords } from "@/lib/geolocation";
+import { reverseGeocode } from "@/lib/geocoder";
 
 export type Phase = "scan" | "located" | "listed";
 export type AppState = "permission" | "denied" | "error" | "loaded";
@@ -65,6 +66,7 @@ export default function Home() {
   const [filterRadius, setFilterRadius] = useState(10);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
+  const [regionName, setRegionName] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -127,6 +129,10 @@ export default function Home() {
       showToast("약국 데이터를 불러오지 못했어요. 샘플 데이터를 표시합니다.");
     }
     startScan();
+    // Reverse geocoding runs after SDK is ready (MapView loads it after startScan)
+    reverseGeocode(coords.lat, coords.lng).then(name => {
+      if (name) setRegionName(name);
+    });
   }
 
   async function handleAllow() {
@@ -288,6 +294,7 @@ export default function Home() {
         selectedPharmacy={selectedPharmacy}
         favorites={favorites}
         activeTab={activeTab}
+        regionName={regionName}
         onTabChange={setActiveTab}
         onToggleFavorite={handleToggleFavorite}
         onCardClick={handleCardClick}

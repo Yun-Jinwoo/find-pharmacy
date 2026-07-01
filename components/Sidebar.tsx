@@ -12,6 +12,7 @@ interface Props {
   selectedPharmacy: Pharmacy | null;
   favorites: string[];
   activeTab: "all" | "favorites";
+  regionName: string;
   onTabChange: (tab: "all" | "favorites") => void;
   onToggleFavorite: (id: string) => void;
   onCardClick: (p: Pharmacy) => void;
@@ -30,6 +31,7 @@ export default function Sidebar({
   selectedPharmacy,
   favorites,
   activeTab,
+  regionName,
   onTabChange,
   onToggleFavorite,
   onCardClick,
@@ -68,7 +70,9 @@ export default function Sidebar({
               <circle cx="12" cy="12" r="3" />
             </svg>
             현재 위치 ·{" "}
-            <b style={{ color: "var(--primary-deep)", fontWeight: 700 }}>강남구 역삼동</b>
+            <b style={{ color: "var(--primary-deep)", fontWeight: 700 }}>
+              {regionName || "위치 확인 중"}
+            </b>
           </div>
         </div>
       </div>
