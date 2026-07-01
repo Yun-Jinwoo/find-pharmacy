@@ -1,4 +1,17 @@
-import { Pharmacy } from "./types";
+import { Pharmacy, DaySchedule } from "./types";
+
+function makeHours(weekday: string, sat: string, sun: string, hol = sun): DaySchedule[] {
+  return [
+    { label: "월요일", hours: weekday, jsDay: 1 },
+    { label: "화요일", hours: weekday, jsDay: 2 },
+    { label: "수요일", hours: weekday, jsDay: 3 },
+    { label: "목요일", hours: weekday, jsDay: 4 },
+    { label: "금요일", hours: weekday, jsDay: 5 },
+    { label: "토요일", hours: sat,     jsDay: 6 },
+    { label: "일요일", hours: sun,     jsDay: 0 },
+    { label: "공휴일", hours: hol,     jsDay: -1 },
+  ];
+}
 
 export const MOCK_PHARMACIES: Pharmacy[] = [
   {
@@ -20,6 +33,7 @@ export const MOCK_PHARMACIES: Pharmacy[] = [
     pinLabel: "약",
     lat: 37.5004,
     lng: 127.0306,
+    weeklyHours: makeHours("09:00 – 22:00", "09:00 – 18:00", "휴무"),
   },
   {
     id: "2",
@@ -40,6 +54,7 @@ export const MOCK_PHARMACIES: Pharmacy[] = [
     pinLabel: "24",
     lat: 37.4940,
     lng: 127.0258,
+    weeklyHours: makeHours("00:00 – 24:00", "00:00 – 24:00", "00:00 – 24:00"),
   },
   {
     id: "3",
@@ -60,6 +75,7 @@ export const MOCK_PHARMACIES: Pharmacy[] = [
     pinLabel: "약",
     lat: 37.5052,
     lng: 127.0342,
+    weeklyHours: makeHours("09:00 – 23:00", "09:00 – 20:00", "10:00 – 18:00"),
   },
   {
     id: "4",
@@ -80,6 +96,7 @@ export const MOCK_PHARMACIES: Pharmacy[] = [
     pinLabel: "약",
     lat: 37.5077,
     lng: 127.0394,
+    weeklyHours: makeHours("09:00 – 22:00", "09:00 – 17:00", "휴무"),
   },
   {
     id: "5",
@@ -100,6 +117,7 @@ export const MOCK_PHARMACIES: Pharmacy[] = [
     pinLabel: "약",
     lat: 37.4880,
     lng: 127.0318,
+    weeklyHours: makeHours("09:00 – 18:00", "09:00 – 13:00", "휴무"),
   },
 ];
 

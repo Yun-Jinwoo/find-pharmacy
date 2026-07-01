@@ -73,23 +73,27 @@ export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
               운영 시간
             </h3>
             <div className="border border-[var(--line)] rounded-[14px] overflow-hidden">
-              {[
-                { day: "오늘 (금)", time: "09:00 – 22:00", today: true },
-                { day: "토요일", time: "09:00 – 18:00", today: false },
-                { day: "일요일 · 공휴일", time: "10:00 – 20:00", today: false },
-              ].map((r, i) => (
-                <div
-                  key={i}
-                  className={`flex justify-between px-[15px] py-[11px] text-[14px]
-                    ${i > 0 ? "border-t border-[var(--line)]" : ""}
-                    ${r.today ? "bg-[rgba(11,143,172,0.06)]" : ""}`}
-                >
-                  <span className={r.today ? "text-[var(--primary-deep)] font-bold" : "text-[var(--muted)]"}>
-                    {r.day}
-                  </span>
-                  <span className="tabular-nums font-semibold">{r.time}</span>
-                </div>
-              ))}
+              {(() => {
+                const todayJs = new Date().getDay();
+                return pharmacy.weeklyHours.map((row, i) => {
+                  const isToday = row.jsDay === todayJs;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex justify-between px-[15px] py-[11px] text-[14px]
+                        ${i > 0 ? "border-t border-[var(--line)]" : ""}
+                        ${isToday ? "bg-[rgba(11,143,172,0.06)]" : ""}`}
+                    >
+                      <span className={isToday ? "text-[var(--primary-deep)] font-bold" : "text-[var(--muted)]"}>
+                        {isToday ? `오늘 (${row.label.slice(0, 1)})` : row.label}
+                      </span>
+                      <span className={`tabular-nums font-semibold ${row.hours === "휴무" ? "text-[var(--muted)]" : ""}`}>
+                        {row.hours}
+                      </span>
+                    </div>
+                  );
+                });
+              })()}
             </div>
 
             {/* info rows */}

@@ -1,5 +1,11 @@
 export type PharmacyStatus = "open" | "closing" | "closed";
 
+export interface DaySchedule {
+  label: string;
+  hours: string;  // "09:00 – 18:00" or "휴무"
+  jsDay: number;  // JS getDay() 값: 0=일, 1=월…6=토, -1=공휴일
+}
+
 export interface Pharmacy {
   id: string;
   name: string;
@@ -21,4 +27,5 @@ export interface Pharmacy {
   /** real coordinates for Kakao Map */
   lat: number;
   lng: number;
+  weeklyHours: DaySchedule[];
 }

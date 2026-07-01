@@ -1,4 +1,4 @@
-import { Pharmacy, PharmacyStatus } from "./types";
+import { Pharmacy, PharmacyStatus, DaySchedule } from "./types";
 
 function timeToMin(t: unknown): number {
   const s = String(t ?? "").padStart(4, "0");
@@ -38,6 +38,33 @@ function calcCloseSubText(status: PharmacyStatus, endTime: unknown): string {
   return formatCloseTime(endTime) + " 운영";
 }
 
+// API dutyTimeNs/dutyTimeNc 필드 → "HH:MM" 문자열, 없으면 ""
+function fmtApiTime(t: unknown): string {
+  const s = String(t ?? "").trim().padStart(4, "0");
+  if (!/^\d{4}$/.test(s)) return "";
+  return `${s.slice(0, 2)}:${s.slice(2, 4)}`;
+}
+
+const DAY_DEFS = [
+  { key: 1, label: "월요일", jsDay: 1 },
+  { key: 2, label: "화요일", jsDay: 2 },
+  { key: 3, label: "수요일", jsDay: 3 },
+  { key: 4, label: "목요일", jsDay: 4 },
+  { key: 5, label: "금요일", jsDay: 5 },
+  { key: 6, label: "토요일", jsDay: 6 },
+  { key: 7, label: "일요일", jsDay: 0 },
+  { key: 8, label: "공휴일", jsDay: -1 },
+];
+
+function buildWeeklyHours(item: Record<string, unknown>): DaySchedule[] {
+  return DAY_DEFS.map(({ key, label, jsDay }) => {
+    const start = fmtApiTime(item[`dutyTime${key}s`]);
+    const end   = fmtApiTime(item[`dutyTime${key}c`]);
+    const hours = start && end ? `${start} – ${end}` : "휴무";
+    return { label, hours, jsDay };
+  });
+}
+
 export async function fetchNearbyPharmacies(lat: number, lng: number): Promise<Pharmacy[]> {
   const res = await fetch(`/api/pharmacies?lat=${lat}&lng=${lng}&numOfRows=20`);
   if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -69,6 +96,7 @@ export async function fetchNearbyPharmacies(lat: number, lng: number): Promise<P
       pinLabel: "약",
       lat: parseFloat(String(item.latitude)) || lat,
       lng: parseFloat(String(item.longitude)) || lng,
+      weeklyHours: buildWeeklyHours(item),
     };
   });
 }
