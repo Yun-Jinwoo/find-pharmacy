@@ -61,12 +61,20 @@ export default function Home() {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [filterOnlyOpen, setFilterOnlyOpen] = useState(false);
+  const [filterRadius, setFilterRadius] = useState(10);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const activeId = detailId ?? hoveredId;
   const selectedPharmacy = detailId
     ? pharmacies.find(p => p.id === detailId) ?? null
     : null;
+
+  const displayPharmacies = pharmacies.filter(p => {
+    if (filterOnlyOpen && p.status === "closed") return false;
+    if (p.distanceM > filterRadius * 1000) return false;
+    return true;
+  });
 
   // detect mobile
   useEffect(() => {
@@ -148,6 +156,17 @@ export default function Home() {
     setHoveredId(cur => (cur === id ? null : cur));
   }
 
+  function handleSearchSelect(p: Pharmacy) {
+    setSearchOpen(false);
+    setDetailId(p.id);
+    setHoveredId(p.id);
+  }
+
+  function handleFilterApply(opts: { onlyOpen: boolean; radius: number }) {
+    setFilterOnlyOpen(opts.onlyOpen);
+    setFilterRadius(opts.radius);
+  }
+
   // ── Overlay states ──────────────────────────────────────
   if (appState !== "loaded") {
     return (
@@ -198,7 +217,7 @@ export default function Home() {
           onFilterClick={() => setFilterOpen(true)}
         />
         <BottomSheet
-          pharmacies={pharmacies}
+          pharmacies={displayPharmacies}
           phase={phase}
           activeId={activeId}
           onCardClick={handleCardClick}
@@ -207,11 +226,20 @@ export default function Home() {
           showToast={showToast}
         />
         <Toast message={toastMsg} />
-        {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
+        {searchOpen && (
+          <SearchOverlay
+            pharmacies={pharmacies}
+            onClose={() => setSearchOpen(false)}
+            onSelect={handleSearchSelect}
+          />
+        )}
         {filterOpen && (
           <FilterSheet
-            pharmacyCount={pharmacies.filter(p => p.status !== "closed").length}
+            pharmacies={pharmacies}
+            initialOnlyOpen={filterOnlyOpen}
+            initialRadius={filterRadius}
             onClose={() => setFilterOpen(false)}
+            onApply={handleFilterApply}
           />
         )}
         <DevNav current={appState} onChange={switchState} />
@@ -229,7 +257,7 @@ export default function Home() {
       }}
     >
       <Sidebar
-        pharmacies={pharmacies}
+        pharmacies={displayPharmacies}
         phase={phase}
         activeId={activeId}
         selectedPharmacy={selectedPharmacy}
@@ -253,11 +281,20 @@ export default function Home() {
         onRecenter={() => showToast("현재 위치로 이동했어요")}
       />
       <Toast message={toastMsg} />
-      {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
+      {searchOpen && (
+        <SearchOverlay
+          pharmacies={pharmacies}
+          onClose={() => setSearchOpen(false)}
+          onSelect={handleSearchSelect}
+        />
+      )}
       {filterOpen && (
         <FilterSheet
-          pharmacyCount={pharmacies.filter(p => p.status !== "closed").length}
+          pharmacies={pharmacies}
+          initialOnlyOpen={filterOnlyOpen}
+          initialRadius={filterRadius}
           onClose={() => setFilterOpen(false)}
+          onApply={handleFilterApply}
         />
       )}
       <DevNav current={appState} onChange={switchState} />
