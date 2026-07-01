@@ -236,6 +236,26 @@ export default function Home() {
   if (isMobile === null) return null;
 
   // ── Mobile layout ───────────────────────────────────────
+  const SonarPin = () => (
+    <div style={{ position: "relative", width: 24, height: 24 }}>
+      <span style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 24, height: 24, borderRadius: "50%",
+        background: "rgba(11,143,172,0.32)",
+        animation: "sonar 2.2s ease-out infinite",
+      }} />
+      <span style={{
+        display: "block", position: "absolute", left: "50%", top: "50%",
+        transform: "translate(-50%,-50%)",
+        width: 18, height: 18, borderRadius: "50%",
+        background: "var(--primary)",
+        border: "3px solid white",
+        boxShadow: "0 0 0 5px rgba(11,143,172,0.2), 0 4px 14px -4px rgba(11,143,172,0.75)",
+        zIndex: 2,
+      }} />
+    </div>
+  );
+
   if (isMobile) {
     return (
       <main className="relative h-screen overflow-hidden">
@@ -258,16 +278,7 @@ export default function Home() {
             className="absolute pointer-events-none"
             style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 28 }}
           >
-            <svg width="48" height="52" viewBox="0 0 48 52" fill="none">
-              <line x1="24" y1="6"  x2="24" y2="15" stroke="var(--primary)" strokeWidth="2.2" strokeLinecap="round"/>
-              <line x1="24" y1="33" x2="24" y2="42" stroke="var(--primary)" strokeWidth="2.2" strokeLinecap="round"/>
-              <line x1="6"  y1="24" x2="15" y2="24" stroke="var(--primary)" strokeWidth="2.2" strokeLinecap="round"/>
-              <line x1="33" y1="24" x2="42" y2="24" stroke="var(--primary)" strokeWidth="2.2" strokeLinecap="round"/>
-              <circle cx="24" cy="24" r="9" stroke="var(--primary)" strokeWidth="2.2"/>
-              <circle cx="24" cy="24" r="3.5" fill="var(--primary)"/>
-              <line x1="24" y1="33" x2="24" y2="46" stroke="var(--primary)" strokeWidth="2.2" strokeLinecap="round"/>
-              <ellipse cx="24" cy="49" rx="4.5" ry="2" fill="rgba(11,143,172,0.35)"/>
-            </svg>
+            <SonarPin />
           </div>
         )}
         {movedCenter && phase === "listed" && (
