@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Pharmacy } from "@/lib/types";
 import { MOCK_PHARMACIES } from "@/lib/mockData";
+import { fetchNearbyPharmacies } from "@/lib/pharmacyApi";
 import Sidebar from "@/components/Sidebar";
 import MapView from "@/components/MapView";
 import BottomSheet from "@/components/BottomSheet";
@@ -57,13 +58,14 @@ export default function Home() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeChip, setActiveChip] = useState(0);
+  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const activeId = detailId ?? hoveredId;
   const selectedPharmacy = detailId
-    ? MOCK_PHARMACIES.find(p => p.id === detailId) ?? null
+    ? pharmacies.find(p => p.id === detailId) ?? null
     : null;
 
   // detect mobile
@@ -95,12 +97,23 @@ export default function Home() {
     setAppState("loaded");
   }
 
+  async function loadAndStart(coords: Coords) {
+    setUserCoords(coords);
+    try {
+      const data = await fetchNearbyPharmacies(coords.lat, coords.lng);
+      setPharmacies(data.length > 0 ? data : MOCK_PHARMACIES);
+    } catch {
+      setPharmacies(MOCK_PHARMACIES);
+      showToast("약국 데이터를 불러오지 못했어요. 샘플 데이터를 표시합니다.");
+    }
+    startScan();
+  }
+
   async function handleAllow() {
     setIsLocating(true);
     try {
       const coords = await requestLocation();
-      setUserCoords(coords);
-      startScan();
+      await loadAndStart(coords);
     } catch {
       showToast("위치를 가져올 수 없어요. 지역을 직접 선택해 주세요.");
       setAppState("denied");
@@ -109,9 +122,8 @@ export default function Home() {
     }
   }
 
-  function handleRegionConfirm(coords: Coords) {
-    setUserCoords(coords);
-    startScan();
+  async function handleRegionConfirm(coords: Coords) {
+    await loadAndStart(coords);
   }
 
   function switchState(s: AppState) {
@@ -167,7 +179,7 @@ export default function Home() {
     return (
       <main className="relative h-screen overflow-hidden">
         <MapView
-          pharmacies={MOCK_PHARMACIES}
+          pharmacies={pharmacies}
           phase={phase}
           activeId={activeId}
           isMobile
@@ -186,7 +198,7 @@ export default function Home() {
           onFilterClick={() => setFilterOpen(true)}
         />
         <BottomSheet
-          pharmacies={MOCK_PHARMACIES}
+          pharmacies={pharmacies}
           phase={phase}
           activeId={activeId}
           onCardClick={handleCardClick}
@@ -198,7 +210,7 @@ export default function Home() {
         {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
         {filterOpen && (
           <FilterSheet
-            pharmacyCount={MOCK_PHARMACIES.filter(p => p.status !== "closed").length}
+            pharmacyCount={pharmacies.filter(p => p.status !== "closed").length}
             onClose={() => setFilterOpen(false)}
           />
         )}
@@ -217,7 +229,7 @@ export default function Home() {
       }}
     >
       <Sidebar
-        pharmacies={MOCK_PHARMACIES}
+        pharmacies={pharmacies}
         phase={phase}
         activeId={activeId}
         selectedPharmacy={selectedPharmacy}
@@ -230,7 +242,7 @@ export default function Home() {
         showToast={showToast}
       />
       <MapView
-        pharmacies={MOCK_PHARMACIES}
+        pharmacies={pharmacies}
         phase={phase}
         activeId={activeId}
         userLat={userCoords?.lat}
@@ -244,7 +256,7 @@ export default function Home() {
       {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
       {filterOpen && (
         <FilterSheet
-          pharmacyCount={MOCK_PHARMACIES.filter(p => p.status !== "closed").length}
+          pharmacyCount={pharmacies.filter(p => p.status !== "closed").length}
           onClose={() => setFilterOpen(false)}
         />
       )}
