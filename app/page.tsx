@@ -63,7 +63,16 @@ export default function Home() {
   const [isLocating, setIsLocating] = useState(false);
   const [filterOnlyOpen, setFilterOnlyOpen] = useState(false);
   const [filterRadius, setFilterRadius] = useState(10);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pharmacy-favorites");
+      if (stored) setFavorites(JSON.parse(stored));
+    } catch { /* ignore */ }
+  }, []);
 
   const activeId = detailId ?? hoveredId;
   const selectedPharmacy = detailId
@@ -75,6 +84,9 @@ export default function Home() {
     if (p.distanceM > filterRadius * 1000) return false;
     return true;
   });
+
+  const favoritePharmacies = pharmacies.filter(p => favorites.includes(p.id));
+  const tabPharmacies = activeTab === "favorites" ? favoritePharmacies : displayPharmacies;
 
   // detect mobile
   useEffect(() => {
@@ -167,6 +179,15 @@ export default function Home() {
     setFilterRadius(opts.radius);
   }
 
+  function handleToggleFavorite(id: string) {
+    setFavorites(prev => {
+      const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
+      try { localStorage.setItem("pharmacy-favorites", JSON.stringify(next)); }
+      catch { /* ignore */ }
+      return next;
+    });
+  }
+
   // ── Overlay states ──────────────────────────────────────
   if (appState !== "loaded") {
     return (
@@ -217,9 +238,13 @@ export default function Home() {
           onFilterClick={() => setFilterOpen(true)}
         />
         <BottomSheet
-          pharmacies={displayPharmacies}
+          pharmacies={tabPharmacies}
           phase={phase}
           activeId={activeId}
+          favorites={favorites}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onToggleFavorite={handleToggleFavorite}
           onCardClick={handleCardClick}
           onCardEnter={handleHoverEnter}
           onCardLeave={handleHoverLeave}
@@ -257,10 +282,14 @@ export default function Home() {
       }}
     >
       <Sidebar
-        pharmacies={displayPharmacies}
+        pharmacies={tabPharmacies}
         phase={phase}
         activeId={activeId}
         selectedPharmacy={selectedPharmacy}
+        favorites={favorites}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onToggleFavorite={handleToggleFavorite}
         onCardClick={handleCardClick}
         onCardEnter={handleHoverEnter}
         onCardLeave={handleHoverLeave}
