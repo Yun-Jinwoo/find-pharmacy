@@ -73,19 +73,39 @@ function makePinEl(p: Pharmacy): HTMLElement {
   // pin head
   const head = document.createElement("div");
   head.style.cssText =
-    "width:38px;height:38px;border-radius:50% 50% 50% 3px;" +
+    "position:relative;width:38px;height:38px;border-radius:50% 50% 50% 3px;" +
     `background:${STATUS_BG[p.status]};` +
     "box-shadow:0 8px 18px -4px rgba(8,53,66,0.6);" +
-    "display:grid;place-items:center;" +
+    "display:grid;place-items:center;overflow:hidden;" +
     "transform:rotate(45deg);" +
     "transition:transform 0.18s,outline 0.15s;";
 
-  const lbl = document.createElement("b");
-  lbl.style.cssText =
-    "color:white;font-weight:800;font-size:15px;" +
-    "transform:rotate(-45deg);display:block;font-family:inherit;";
-  lbl.textContent = p.pinLabel;
-  head.appendChild(lbl);
+  // glossy highlight (light source in the upper-left of the rotated head)
+  const glossEllipse = document.createElement("span");
+  glossEllipse.style.cssText =
+    "position:absolute;top:6px;left:7px;width:13px;height:6px;border-radius:50%;" +
+    "background:rgba(255,255,255,0.4);transform:rotate(-25deg);pointer-events:none;";
+  const glossDot = document.createElement("span");
+  glossDot.style.cssText =
+    "position:absolute;top:14px;left:9px;width:3px;height:3px;border-radius:50%;" +
+    "background:rgba(255,255,255,0.45);pointer-events:none;";
+  head.appendChild(glossEllipse);
+  head.appendChild(glossDot);
+
+  const capsulePath = "m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z";
+  const clipId = `capsule-clip-${p.id}`;
+  const iconWrap = document.createElement("div");
+  iconWrap.style.cssText = "transform:rotate(-45deg);display:grid;place-items:center;";
+  iconWrap.innerHTML =
+    '<svg width="19" height="19" viewBox="0 0 24 24">' +
+    `<defs><clipPath id="${clipId}"><path d="${capsulePath}"/></clipPath></defs>` +
+    `<g clip-path="url(#${clipId})">` +
+    '<polygon points="0,0 0,24 24,24" fill="white"/>' +
+    '<polygon points="0,0 24,0 24,24" fill="#9B8AE0"/>' +
+    "</g>" +
+    `<path d="${capsulePath}" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.3"/>` +
+    "</svg>";
+  head.appendChild(iconWrap);
 
   wrap.appendChild(tip);
   wrap.appendChild(head);
