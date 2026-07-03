@@ -15,11 +15,12 @@ interface Props {
   isMobile?: boolean;
   userLat?: number;
   userLng?: number;
+  initialCenter?: { lat: number; lng: number };
   onPinClick: (p: Pharmacy) => void;
   onPinEnter: (id: string) => void;
   onPinLeave: (id: string) => void;
   onRecenter?: () => void;
-  onMapMove?: (lat: number, lng: number) => void;
+  onMapMove?: (lat: number, lng: number, radiusKm: number) => void;
 }
 
 // Fallback to Gangnam area when no real coords provided
@@ -124,6 +125,7 @@ export default function MapView({
   isMobile = false,
   userLat,
   userLng,
+  initialCenter,
   onPinClick,
   onPinEnter,
   onPinLeave,
@@ -144,8 +146,8 @@ export default function MapView({
 
     function startMap() {
       if (!mounted || !containerRef.current) return;
-      const lat = userLat ?? FALLBACK_LAT;
-      const lng = userLng ?? FALLBACK_LNG;
+      const lat = initialCenter?.lat ?? userLat ?? FALLBACK_LAT;
+      const lng = initialCenter?.lng ?? userLng ?? FALLBACK_LNG;
 
       window.kakao.maps.load(() => {
         if (!mounted || !containerRef.current) return;
@@ -159,7 +161,17 @@ export default function MapView({
         // Notify parent when map is dragged to a new position
         window.kakao.maps.event.addListener(map, "dragend", () => {
           const c = map.getCenter();
-          onMapMove?.(c.getLat(), c.getLng());
+          const cLat = c.getLat();
+          const cLng = c.getLng();
+          // Estimate viewport radius (center → NE corner) for numOfRows calculation
+          const ne = map.getBounds().getNorthEast();
+          const df = (ne.getLat() - cLat) * Math.PI / 180;
+          const dl = (ne.getLng() - cLng) * Math.PI / 180;
+          const f1 = cLat * Math.PI / 180;
+          const f2 = ne.getLat() * Math.PI / 180;
+          const a = Math.sin(df / 2) ** 2 + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) ** 2;
+          const radiusKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          onMapMove?.(cLat, cLng, radiusKm);
         });
 
         // ── Capture Kakao's tile-layer elements BEFORE adding our overlays ──
@@ -191,7 +203,7 @@ export default function MapView({
         myDot.appendChild(dot);
 
         new window.kakao.maps.CustomOverlay({
-          position: new window.kakao.maps.LatLng(lat, lng),
+          position: new window.kakao.maps.LatLng(userLat ?? FALLBACK_LAT, userLng ?? FALLBACK_LNG),
           content: myDot,
           xAnchor: 0.5,
           yAnchor: 0.5,

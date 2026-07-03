@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Pharmacy } from "@/lib/types";
 import { MOCK_PHARMACIES } from "@/lib/mockData";
-import { fetchNearbyPharmacies } from "@/lib/pharmacyApi";
+import { fetchNearbyPharmacies, recalcDistances } from "@/lib/pharmacyApi";
 import Sidebar from "@/components/Sidebar";
 import MapView from "@/components/MapView";
 import BottomSheet from "@/components/BottomSheet";
@@ -68,7 +68,9 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
   const [regionName, setRegionName] = useState("");
   const [mapKey, setMapKey] = useState(0);
+  const [searchCenter, setSearchCenter] = useState<Coords | null>(null);
   const [movedCenter, setMovedCenter] = useState<Coords | null>(null);
+  const [viewportRadiusKm, setViewportRadiusKm] = useState(1);
   const [animKey, setAnimKey] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -91,7 +93,9 @@ export default function Home() {
   });
 
   const favoritePharmacies = pharmacies.filter(p => favorites.includes(p.id));
-  const tabPharmacies = activeTab === "favorites" ? favoritePharmacies : displayPharmacies;
+  const tabPharmacies = (activeTab === "favorites" ? favoritePharmacies : displayPharmacies)
+    .slice()
+    .sort((a, b) => a.distanceM - b.distanceM);
 
   // detect mobile
   useEffect(() => {
@@ -125,7 +129,7 @@ export default function Home() {
 
   async function loadAndStart(coords: Coords) {
     setUserCoords(coords);
-    setMovedCenter(null);
+    setSearchCenter(coords);
     try {
       const data = await fetchNearbyPharmacies(coords.lat, coords.lng);
       setPharmacies(data.length > 0 ? data : MOCK_PHARMACIES);
@@ -191,13 +195,32 @@ export default function Home() {
     setFilterRadius(opts.radius);
   }
 
-  function handleMapMove(lat: number, lng: number) {
+  function handleMapMove(lat: number, lng: number, radiusKm: number) {
     setMovedCenter({ lat, lng });
+    setViewportRadiusKm(radiusKm);
   }
 
   async function handleResearch() {
     if (!movedCenter) return;
-    await loadAndStart(movedCenter);
+    const center = movedCenter;
+    setSearchCenter(center);
+    setMovedCenter(null);
+
+    const numOfRows = Math.min(100, Math.max(50, Math.round(viewportRadiusKm * viewportRadiusKm * 25)));
+
+    let data: Pharmacy[];
+    try {
+      const raw = await fetchNearbyPharmacies(center.lat, center.lng, numOfRows);
+      const list = raw.length > 0 ? raw : MOCK_PHARMACIES;
+      data = userCoords ? recalcDistances(list, userCoords.lat, userCoords.lng) : list;
+    } catch {
+      data = userCoords ? recalcDistances(MOCK_PHARMACIES, userCoords.lat, userCoords.lng) : MOCK_PHARMACIES;
+      showToast("약국 데이터를 불러오지 못했어요. 샘플 데이터를 표시합니다.");
+    }
+
+    setPharmacies(data);
+    setMapKey(k => k + 1);
+    startScan();
   }
 
   function handleToggleFavorite(id: string) {
@@ -235,27 +258,27 @@ export default function Home() {
   // isMobile hasn't resolved yet (extremely brief, avoids hydration flash)
   if (isMobile === null) return null;
 
-  // ── Mobile layout ───────────────────────────────────────
-  const SonarPin = () => (
-    <div style={{ position: "relative", width: 24, height: 24 }}>
-      <span style={{
-        position: "absolute", left: "50%", top: "50%",
-        width: 24, height: 24, borderRadius: "50%",
-        background: "rgba(11,143,172,0.32)",
-        animation: "sonar 2.2s ease-out infinite",
-      }} />
-      <span style={{
-        display: "block", position: "absolute", left: "50%", top: "50%",
-        transform: "translate(-50%,-50%)",
-        width: 18, height: 18, borderRadius: "50%",
-        background: "var(--primary)",
-        border: "3px solid white",
-        boxShadow: "0 0 0 5px rgba(11,143,172,0.2), 0 4px 14px -4px rgba(11,143,172,0.75)",
-        zIndex: 2,
-      }} />
-    </div>
+  const ResearchButton = ({ style }: { style?: React.CSSProperties }) => (
+    <button
+      onClick={handleResearch}
+      className="absolute flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
+      style={{
+        padding: "11px 20px",
+        fontSize: 14,
+        background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
+        boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
+        animation: "fadeIn 0.25s ease",
+        ...style,
+      }}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
+      </svg>
+      이 위치에서 재검색
+    </button>
   );
 
+  // ── Mobile layout ───────────────────────────────────────
   if (isMobile) {
     return (
       <main className="relative h-screen overflow-hidden">
@@ -267,6 +290,7 @@ export default function Home() {
           isMobile
           userLat={userCoords?.lat}
           userLng={userCoords?.lng}
+          initialCenter={searchCenter ?? undefined}
           onPinClick={handleCardClick}
           onPinEnter={handleHoverEnter}
           onPinLeave={handleHoverLeave}
@@ -274,32 +298,7 @@ export default function Home() {
           onMapMove={handleMapMove}
         />
         {movedCenter && phase === "listed" && (
-          <div
-            className="absolute pointer-events-none"
-            style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 28 }}
-          >
-            <SonarPin />
-          </div>
-        )}
-        {movedCenter && phase === "listed" && (
-          <button
-            onClick={handleResearch}
-            className="absolute left-1/2 z-[29] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
-            style={{
-              top: 110,
-              transform: "translateX(-50%)",
-              padding: "11px 20px",
-              fontSize: 14,
-              background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
-              boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
-              animation: "fadeIn 0.25s ease",
-            }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-              <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
-            </svg>
-            이 위치에서 재검색
-          </button>
+          <ResearchButton style={{ top: 110, left: "50%", transform: "translateX(-50%)", zIndex: 29 }} />
         )}
         <MobileTopBar
           phase={phase}
@@ -377,6 +376,7 @@ export default function Home() {
         activeId={activeId}
         userLat={userCoords?.lat}
         userLng={userCoords?.lng}
+        initialCenter={searchCenter ?? undefined}
         onPinClick={handleCardClick}
         onPinEnter={handleHoverEnter}
         onPinLeave={handleHoverLeave}
@@ -384,33 +384,9 @@ export default function Home() {
         onMapMove={handleMapMove}
       />
       {movedCenter && phase === "listed" && (
-        <div
-          className="absolute pointer-events-none"
-          style={{ top: "50%", left: "calc(206px + 50%)", transform: "translate(-50%, -50%)", zIndex: 9 }}
-        >
-          <SonarPin />
-        </div>
-      )}
-      {movedCenter && phase === "listed" && (
-        <button
-          onClick={handleResearch}
-          className="absolute z-[10] flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
-          style={{
-            top: 20,
-            left: "calc(206px + 50%)",
-            transform: "translateX(-50%)",
-            padding: "11px 20px",
-            fontSize: 14,
-            background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
-            boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
-            animation: "fadeIn 0.25s ease",
-          }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-            <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
-          </svg>
-          이 위치에서 재검색
-        </button>
+        <ResearchButton
+          style={{ top: 20, left: "calc(206px + 50%)", transform: "translateX(-50%)", zIndex: 10 }}
+        />
       )}
       <Toast message={toastMsg} />
       {searchOpen && (
