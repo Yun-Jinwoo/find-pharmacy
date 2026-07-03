@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { Pharmacy } from "@/lib/types";
+import { DaySchedule } from "@/lib/types";
 import StatusBadge from "./StatusBadge";
 import { callPharmacy, navigateTo } from "@/lib/actions";
+import { fetchPharmacyDetail } from "@/lib/pharmacyApi";
 
 interface Props {
   pharmacy: Pharmacy | null;
@@ -19,6 +22,28 @@ const countdownStyles = {
 export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
   const isOpen = !!pharmacy;
   const cd = pharmacy ? countdownStyles[pharmacy.countdownType] : countdownStyles[""];
+
+  const cacheRef = useRef<Map<string, DaySchedule[]>>(new Map());
+  const [detailHours, setDetailHours] = useState<DaySchedule[] | null>(null);
+  const [hoursLoading, setHoursLoading] = useState(false);
+
+  useEffect(() => {
+    if (!pharmacy) return;
+    const cached = cacheRef.current.get(pharmacy.id);
+    if (cached) { setDetailHours(cached); return; }
+
+    setDetailHours(null);
+    setHoursLoading(true);
+    fetchPharmacyDetail(pharmacy.id)
+      .then(hours => {
+        cacheRef.current.set(pharmacy.id, hours);
+        setDetailHours(hours);
+      })
+      .catch(() => { /* 실패 시 기본 시간 유지 */ })
+      .finally(() => setHoursLoading(false));
+  }, [pharmacy?.id]);
+
+  const weeklyHours = detailHours ?? pharmacy?.weeklyHours ?? [];
 
   return (
     <div
@@ -73,9 +98,19 @@ export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
               운영 시간
             </h3>
             <div className="border border-[var(--line)] rounded-[14px] overflow-hidden">
-              {(() => {
+              {hoursLoading ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`flex justify-between items-center px-[15px] py-[11px] ${i > 0 ? "border-t border-[var(--line)]" : ""}`}
+                  >
+                    <div className="w-14 h-[14px] rounded-[4px] bg-[#e8eef1] animate-pulse" />
+                    <div className="w-28 h-[14px] rounded-[4px] bg-[#e8eef1] animate-pulse" />
+                  </div>
+                ))
+              ) : (() => {
                 const todayJs = new Date().getDay();
-                return pharmacy.weeklyHours.map((row, i) => {
+                return weeklyHours.map((row, i) => {
                   const isToday = row.jsDay === todayJs;
                   return (
                     <div

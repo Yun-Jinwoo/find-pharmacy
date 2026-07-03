@@ -1,5 +1,23 @@
 import { Pharmacy, PharmacyStatus, DaySchedule } from "./types";
 
+function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const f1 = lat1 * Math.PI / 180;
+  const f2 = lat2 * Math.PI / 180;
+  const df = (lat2 - lat1) * Math.PI / 180;
+  const dl = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(df / 2) ** 2 + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export function recalcDistances(pharmacies: Pharmacy[], userLat: number, userLng: number): Pharmacy[] {
+  return pharmacies.map(p => {
+    const distM = Math.round(haversineM(userLat, userLng, p.lat, p.lng));
+    const walkMin = Math.max(1, Math.round(distM / 67));
+    return { ...p, distanceM: distM, walkTime: `도보 ${walkMin}분` };
+  });
+}
+
 function timeToMin(t: unknown): number {
   const s = String(t ?? "").padStart(4, "0");
   if (!/^\d{4}$/.test(s)) return -1;
@@ -40,7 +58,8 @@ function calcCloseSubText(status: PharmacyStatus, endTime: unknown): string {
 
 // API dutyTimeNs/dutyTimeNc 필드 → "HH:MM" 문자열, 없으면 ""
 function fmtApiTime(t: unknown): string {
-  const s = String(t ?? "").trim().padStart(4, "0");
+  if (!t) return ""; // null / undefined / 0 / "" → 휴무
+  const s = String(t).trim().padStart(4, "0");
   if (!/^\d{4}$/.test(s)) return "";
   return `${s.slice(0, 2)}:${s.slice(2, 4)}`;
 }
@@ -57,6 +76,14 @@ const DAY_DEFS = [
 ];
 
 function buildWeeklyHours(item: Record<string, unknown>): DaySchedule[] {
+  // 위치 기반 API는 startTime/endTime만 제공 → 전 요일 동일 표시
+  const start = fmtApiTime(item.startTime);
+  const end   = fmtApiTime(item.endTime);
+  const hours = start && end ? `${start} – ${end}` : "휴무";
+  return DAY_DEFS.map(({ label, jsDay }) => ({ label, hours, jsDay }));
+}
+
+function parseDetailHours(item: Record<string, unknown>): DaySchedule[] {
   return DAY_DEFS.map(({ key, label, jsDay }) => {
     const start = fmtApiTime(item[`dutyTime${key}s`]);
     const end   = fmtApiTime(item[`dutyTime${key}c`]);
@@ -65,8 +92,16 @@ function buildWeeklyHours(item: Record<string, unknown>): DaySchedule[] {
   });
 }
 
-export async function fetchNearbyPharmacies(lat: number, lng: number): Promise<Pharmacy[]> {
-  const res = await fetch(`/api/pharmacies?lat=${lat}&lng=${lng}&numOfRows=20`);
+export async function fetchPharmacyDetail(hpid: string): Promise<DaySchedule[]> {
+  const res = await fetch(`/api/pharmacy?hpid=${encodeURIComponent(hpid)}`);
+  if (!res.ok) throw new Error(`${res.status}`);
+  const item: Record<string, unknown> | null = await res.json();
+  if (!item) return [];
+  return parseDetailHours(item);
+}
+
+export async function fetchNearbyPharmacies(lat: number, lng: number, numOfRows = 50): Promise<Pharmacy[]> {
+  const res = await fetch(`/api/pharmacies?lat=${lat}&lng=${lng}&numOfRows=${numOfRows}`);
   if (!res.ok) throw new Error(`API error ${res.status}`);
 
   const items: Record<string, unknown>[] = await res.json();
