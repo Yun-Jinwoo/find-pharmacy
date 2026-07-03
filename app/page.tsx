@@ -49,6 +49,28 @@ function MapBackground() {
   );
 }
 
+function ResearchButton({ onClick, style }: { onClick: () => void; style?: React.CSSProperties }) {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
+      style={{
+        padding: "11px 20px",
+        fontSize: 14,
+        background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
+        boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
+        animation: "fadeIn 0.25s ease",
+        ...style,
+      }}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
+      </svg>
+      이 위치에서 재검색
+    </button>
+  );
+}
+
 export default function Home() {
   const [appState, setAppState] = useState<AppState>("permission");
   const [phase, setPhase] = useState<Phase>("scan");
@@ -258,26 +280,6 @@ export default function Home() {
   // isMobile hasn't resolved yet (extremely brief, avoids hydration flash)
   if (isMobile === null) return null;
 
-  const ResearchButton = ({ style }: { style?: React.CSSProperties }) => (
-    <button
-      onClick={handleResearch}
-      className="absolute flex items-center gap-[7px] rounded-full border-0 cursor-pointer font-bold text-white"
-      style={{
-        padding: "11px 20px",
-        fontSize: 14,
-        background: "linear-gradient(135deg, var(--primary), var(--primary-deep))",
-        boxShadow: "0 8px 24px -8px rgba(11,143,172,0.85)",
-        animation: "fadeIn 0.25s ease",
-        ...style,
-      }}
-    >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
-      </svg>
-      이 위치에서 재검색
-    </button>
-  );
-
   // ── Mobile layout ───────────────────────────────────────
   if (isMobile) {
     return (
@@ -298,7 +300,7 @@ export default function Home() {
           onMapMove={handleMapMove}
         />
         {movedCenter && phase === "listed" && (
-          <ResearchButton style={{ top: 110, left: "50%", transform: "translateX(-50%)", zIndex: 29 }} />
+          <ResearchButton onClick={handleResearch} style={{ top: 168, left: "50%", transform: "translateX(-50%)", zIndex: 29 }} />
         )}
         <MobileTopBar
           phase={phase}
@@ -385,6 +387,7 @@ export default function Home() {
       />
       {movedCenter && phase === "listed" && (
         <ResearchButton
+          onClick={handleResearch}
           style={{ top: 20, left: "calc(206px + 50%)", transform: "translateX(-50%)", zIndex: 10 }}
         />
       )}
