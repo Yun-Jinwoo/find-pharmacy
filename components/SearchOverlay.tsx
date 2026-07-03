@@ -7,6 +7,8 @@ interface Props {
   pharmacies: Pharmacy[];
   onClose: () => void;
   onSelect: (p: Pharmacy) => void;
+  /** desktop: 사이드바 안쪽에 이어붙는 형태 (상단 브랜드 헤더 아래 위치 그대로 유지) */
+  desktop?: boolean;
 }
 
 const RECENT_KEY = "pharmacy-recent";
@@ -27,7 +29,7 @@ function saveRecent(terms: string[]) {
   catch { /* ignore */ }
 }
 
-export default function SearchOverlay({ pharmacies, onClose, onSelect }: Props) {
+export default function SearchOverlay({ pharmacies, onClose, onSelect, desktop = false }: Props) {
   const [query, setQuery] = useState("");
   const [recent, setRecent] = useState<string[]>([]);
 
@@ -61,11 +63,11 @@ export default function SearchOverlay({ pharmacies, onClose, onSelect }: Props) 
 
   return (
     <div
-      className="absolute inset-0 z-[60] bg-white flex flex-col"
+      className={desktop ? "flex-1 flex flex-col bg-white overflow-hidden" : "absolute inset-0 z-[60] bg-white flex flex-col"}
       style={{ animation: "fadeIn 0.2s ease" }}
     >
       {/* header */}
-      <div className="flex items-center gap-[10px] px-[14px] pt-[54px] pb-[12px]">
+      <div className={`flex items-center gap-[10px] ${desktop ? "px-[24px] pt-[2px] pb-[14px]" : "px-[14px] pt-[54px] pb-[12px]"}`}>
         <div
           className="flex-1 flex items-center gap-[10px] rounded-[13px] border"
           style={{ height: 44, borderColor: "var(--primary)", padding: "0 12px", background: "#f3f7f9" }}
@@ -99,6 +101,7 @@ export default function SearchOverlay({ pharmacies, onClose, onSelect }: Props) 
         </button>
       </div>
 
+      <div className="flex-1 overflow-y-auto">
       {/* results */}
       {results.length > 0 && (
         <>
@@ -116,8 +119,9 @@ export default function SearchOverlay({ pharmacies, onClose, onSelect }: Props) 
               >
                 <div className="grid place-items-center rounded-[12px] flex-none" style={{ width: 40, height: 40, background: "rgba(11,143,172,0.1)", color: "var(--primary)" }}>
                   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 7h16M9 7V5a3 3 0 0 1 6 0v2M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
-                    <path d="M12 11v6M9 14h6" />
+                    <path d="M4 13a8 8 0 0 0 16 0" />
+                    <path d="M4 13h16" />
+                    <path d="M8.5 9L15 3" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -171,6 +175,7 @@ export default function SearchOverlay({ pharmacies, onClose, onSelect }: Props) 
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }

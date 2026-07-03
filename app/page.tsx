@@ -362,12 +362,14 @@ export default function Home() {
     >
       <Sidebar
         pharmacies={tabPharmacies}
+        allPharmacies={pharmacies}
         phase={phase}
         activeId={activeId}
         selectedPharmacy={selectedPharmacy}
         favorites={favorites}
         activeTab={activeTab}
         regionName={regionName}
+        searchOpen={searchOpen}
         onTabChange={setActiveTab}
         onToggleFavorite={handleToggleFavorite}
         onCardClick={handleCardClick}
@@ -375,6 +377,8 @@ export default function Home() {
         onCardLeave={handleHoverLeave}
         onDetailClose={handleDetailClose}
         onSearchClick={() => setSearchOpen(true)}
+        onSearchClose={() => setSearchOpen(false)}
+        onSearchSelect={handleSearchSelect}
         onFilterClick={() => setFilterOpen(true)}
         showToast={showToast}
       />
@@ -399,13 +403,6 @@ export default function Home() {
         />
       )}
       <Toast message={toastMsg} />
-      {searchOpen && (
-        <SearchOverlay
-          pharmacies={pharmacies}
-          onClose={() => setSearchOpen(false)}
-          onSelect={handleSearchSelect}
-        />
-      )}
       {filterOpen && (
         <FilterSheet
           pharmacies={pharmacies}

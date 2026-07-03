@@ -114,8 +114,9 @@ export default function PharmacyCard({
           }}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 7h16M9 7V5a3 3 0 0 1 6 0v2M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
-            <path d="M12 11v6M9 14h6" />
+            <path d="M4 13a8 8 0 0 0 16 0" />
+            <path d="M4 13h16" />
+            <path d="M8.5 9L15 3" />
           </svg>
         </div>
 
