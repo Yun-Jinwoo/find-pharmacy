@@ -2,7 +2,7 @@
 
 import { Phase } from "@/app/page";
 
-const CHIPS = ["운영 중", "심야 운영", "공휴일", "연중무휴"];
+const CHIPS = ["운영 중", "심야 운영"];
 
 interface Props {
   phase: Phase;

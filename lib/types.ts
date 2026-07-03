@@ -12,6 +12,8 @@ export interface Pharmacy {
   status: PharmacyStatus;
   statusLabel: string;
   hoursToday: string;
+  /** today's closing time in minutes past midnight, -1 if unknown/휴무 */
+  closeTimeMin: number;
   distanceM: number;
   walkTime: string;
   subText: string;

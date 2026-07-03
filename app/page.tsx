@@ -108,9 +108,15 @@ export default function Home() {
     ? pharmacies.find(p => p.id === detailId) ?? null
     : null;
 
+  const NIGHT_CHIP_START_MIN = 22 * 60; // 심야 운영 기준: 오늘 22:00 이후까지 영업
+
   const displayPharmacies = pharmacies.filter(p => {
     if (filterOnlyOpen && p.status === "closed") return false;
     if (p.distanceM > filterRadius * 1000) return false;
+    if (isMobile) {
+      if (activeChip === 0 && p.status === "closed") return false;
+      if (activeChip === 1 && p.closeTimeMin < NIGHT_CHIP_START_MIN) return false;
+    }
     return true;
   });
 
@@ -216,6 +222,7 @@ export default function Home() {
     setFilterOnlyOpen(opts.onlyOpen);
     setFilterRadius(opts.radius);
   }
+
 
   function handleMapMove(lat: number, lng: number, radiusKm: number) {
     setMovedCenter({ lat, lng });

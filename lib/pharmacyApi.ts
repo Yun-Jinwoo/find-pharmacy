@@ -118,6 +118,7 @@ export async function fetchNearbyPharmacies(lat: number, lng: number, numOfRows 
       status,
       statusLabel: status === "open" ? "운영 중" : status === "closing" ? "곧 마감" : "영업 종료",
       hoursToday,
+      closeTimeMin: timeToMin(item.endTime),
       distanceM: distM,
       walkTime: `도보 ${walkMin}분`,
       subText: String(item.dutyAddr ?? ""),
