@@ -84,7 +84,6 @@ export default function Home() {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [filterOnlyOpen, setFilterOnlyOpen] = useState(false);
   const [filterRadius, setFilterRadius] = useState(10);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
@@ -111,7 +110,6 @@ export default function Home() {
   const NIGHT_CHIP_START_MIN = 22 * 60; // 심야 운영 기준: 오늘 22:00 이후까지 영업
 
   const displayPharmacies = pharmacies.filter(p => {
-    if (filterOnlyOpen && p.status === "closed") return false;
     if (p.distanceM > filterRadius * 1000) return false;
     if (isMobile) {
       if (activeChip === 0 && p.status === "closed") return false;
@@ -218,8 +216,7 @@ export default function Home() {
     setHoveredId(p.id);
   }
 
-  function handleFilterApply(opts: { onlyOpen: boolean; radius: number }) {
-    setFilterOnlyOpen(opts.onlyOpen);
+  function handleFilterApply(opts: { radius: number }) {
     setFilterRadius(opts.radius);
   }
 
@@ -340,7 +337,6 @@ export default function Home() {
         {filterOpen && (
           <FilterSheet
             pharmacies={pharmacies}
-            initialOnlyOpen={filterOnlyOpen}
             initialRadius={filterRadius}
             onClose={() => setFilterOpen(false)}
             onApply={handleFilterApply}
@@ -408,7 +404,6 @@ export default function Home() {
           <FilterSheet
             desktop
             pharmacies={pharmacies}
-            initialOnlyOpen={filterOnlyOpen}
             initialRadius={filterRadius}
             onClose={() => setFilterOpen(false)}
             onApply={handleFilterApply}

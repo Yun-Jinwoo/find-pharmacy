@@ -5,38 +5,30 @@ import { Pharmacy } from "@/lib/types";
 
 interface Props {
   pharmacies: Pharmacy[];
-  initialOnlyOpen: boolean;
   initialRadius: number;
   onClose: () => void;
-  onApply: (opts: { onlyOpen: boolean; radius: number }) => void;
+  onApply: (opts: { radius: number }) => void;
   /** desktop: 필터 버튼 아래에 뜨는 작은 팝오버 형태 (모바일 바텀시트 아님) */
   desktop?: boolean;
 }
 
 export default function FilterSheet({
   pharmacies,
-  initialOnlyOpen,
   initialRadius,
   onClose,
   onApply,
   desktop = false,
 }: Props) {
-  const [onlyOpen, setOnlyOpen] = useState(initialOnlyOpen);
   const [radius, setRadius] = useState(initialRadius);
 
-  const filteredCount = pharmacies.filter(p => {
-    if (onlyOpen && p.status === "closed") return false;
-    if (p.distanceM > radius * 1000) return false;
-    return true;
-  }).length;
+  const filteredCount = pharmacies.filter(p => p.distanceM <= radius * 1000).length;
 
   function handleConfirm() {
-    onApply({ onlyOpen, radius });
+    onApply({ radius });
     onClose();
   }
 
   function handleReset() {
-    setOnlyOpen(false);
     setRadius(10);
   }
 
@@ -87,40 +79,8 @@ export default function FilterSheet({
           </button>
         </div>
 
-        {/* 운영 중만 보기 toggle */}
-        <div className="flex items-center justify-between" style={{ padding: "12px 0" }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: onlyOpen ? "var(--ink)" : "var(--muted)" }}>
-            운영 중만 보기
-          </span>
-          <button
-            onClick={() => setOnlyOpen(v => !v)}
-            className="border-0 cursor-pointer relative flex-none"
-            style={{
-              width: 44,
-              height: 26,
-              borderRadius: 999,
-              background: onlyOpen ? "var(--primary)" : "#d3dfe4",
-              padding: 0,
-              transition: "background 0.2s",
-            }}
-          >
-            <span
-              className="absolute top-[3px] rounded-full bg-white"
-              style={{
-                width: 20,
-                height: 20,
-                left: onlyOpen ? "calc(100% - 23px)" : 3,
-                boxShadow: "0 2px 5px rgba(0,0,0,0.25)",
-                transition: "left 0.2s",
-              }}
-            />
-          </button>
-        </div>
-
-        <div style={{ height: 1, background: "var(--line)" }} />
-
         {/* radius slider */}
-        <div style={{ marginTop: 18 }}>
+        <div>
           <div className="flex items-center justify-between mb-[10px]">
             <span style={{ fontSize: 14, fontWeight: 600 }}>검색 반경</span>
             <span style={{ fontSize: 14, fontWeight: 800, color: "var(--primary)", fontVariantNumeric: "tabular-nums" }}>
