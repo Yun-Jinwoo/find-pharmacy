@@ -9,6 +9,8 @@ interface Props {
   initialRadius: number;
   onClose: () => void;
   onApply: (opts: { onlyOpen: boolean; radius: number }) => void;
+  /** desktop: 필터 버튼 아래에 뜨는 작은 팝오버 형태 (모바일 바텀시트 아님) */
+  desktop?: boolean;
 }
 
 export default function FilterSheet({
@@ -17,6 +19,7 @@ export default function FilterSheet({
   initialRadius,
   onClose,
   onApply,
+  desktop = false,
 }: Props) {
   const [onlyOpen, setOnlyOpen] = useState(initialOnlyOpen);
   const [radius, setRadius] = useState(initialRadius);
@@ -39,26 +42,38 @@ export default function FilterSheet({
 
   return (
     <>
-      {/* backdrop */}
+      {/* backdrop: invisible click-catcher on desktop, dimmed sheet backdrop on mobile */}
       <div
-        className="absolute inset-0 z-[40]"
-        style={{ background: "rgba(12,42,51,0.5)" }}
+        className={desktop ? "fixed inset-0 z-[40]" : "absolute inset-0 z-[40]"}
+        style={{ background: desktop ? "transparent" : "rgba(12,42,51,0.5)" }}
         onClick={onClose}
       />
 
-      {/* sheet */}
+      {/* sheet / popover */}
       <div
-        className="absolute left-0 right-0 bottom-0 z-[45] bg-white flex flex-col"
-        style={{
-          borderRadius: "22px 22px 0 0",
-          padding: "8px 18px 32px",
-          animation: "sheetIn 0.38s cubic-bezier(0.22,0.61,0.36,1) forwards",
-        }}
+        className={desktop ? "relative z-[45] bg-white flex flex-col" : "absolute left-0 right-0 bottom-0 z-[45] bg-white flex flex-col"}
+        style={
+          desktop
+            ? {
+                borderRadius: 18,
+                padding: "16px 18px 20px",
+                boxShadow: "0 20px 44px -16px rgba(8,53,66,0.35)",
+                animation: "popIn 0.16s ease forwards",
+                transformOrigin: "top right",
+              }
+            : {
+                borderRadius: "22px 22px 0 0",
+                padding: "8px 18px 32px",
+                animation: "sheetIn 0.38s cubic-bezier(0.22,0.61,0.36,1) forwards",
+              }
+        }
       >
-        {/* grip */}
-        <div className="flex justify-center pb-[10px]">
-          <span className="rounded-full" style={{ width: 34, height: 4, background: "#d3dfe4", display: "block" }} />
-        </div>
+        {/* grip (mobile only) */}
+        {!desktop && (
+          <div className="flex justify-center pb-[10px]">
+            <span className="rounded-full" style={{ width: 34, height: 4, background: "#d3dfe4", display: "block" }} />
+          </div>
+        )}
 
         {/* title row */}
         <div className="flex items-center justify-between mb-[14px]">

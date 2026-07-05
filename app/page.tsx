@@ -404,13 +404,16 @@ export default function Home() {
       )}
       <Toast message={toastMsg} />
       {filterOpen && (
-        <FilterSheet
-          pharmacies={pharmacies}
-          initialOnlyOpen={filterOnlyOpen}
-          initialRadius={filterRadius}
-          onClose={() => setFilterOpen(false)}
-          onApply={handleFilterApply}
-        />
+        <div className="absolute z-[45]" style={{ top: 132, left: 412 - 24 - 260, width: 260 }}>
+          <FilterSheet
+            desktop
+            pharmacies={pharmacies}
+            initialOnlyOpen={filterOnlyOpen}
+            initialRadius={filterRadius}
+            onClose={() => setFilterOpen(false)}
+            onApply={handleFilterApply}
+          />
+        </div>
       )}
       <DevNav current={appState} onChange={switchState} />
     </main>
