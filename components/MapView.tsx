@@ -21,6 +21,8 @@ interface Props {
   onPinLeave: (id: string) => void;
   onRecenter?: () => void;
   onMapMove?: (lat: number, lng: number, radiusKm: number) => void;
+  /** mobile bottom sheet is fully expanded — fade out the recenter button so it doesn't collide with the top bar */
+  sheetExpanded?: boolean;
 }
 
 // Fallback to Gangnam area when no real coords provided
@@ -151,6 +153,7 @@ export default function MapView({
   onPinLeave,
   onRecenter,
   onMapMove,
+  sheetExpanded = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -310,7 +313,7 @@ export default function MapView({
     mapRef.current?.setCenter(new window.kakao.maps.LatLng(lat, lng));
   }
 
-  const recenterBottom = isMobile ? "54%" : 26;
+  const recenterBottom = isMobile ? "calc(var(--sheet-h, 0px) + 16px)" : 26;
 
   return (
     // isolation:isolate creates a stacking context so child z-indexes are self-contained
@@ -318,21 +321,23 @@ export default function MapView({
       className={isMobile ? "absolute inset-0 z-0" : "relative"}
       style={{ isolation: "isolate" }}
     >
-      <div ref={containerRef} className="absolute inset-0" />
+      <div ref={containerRef} className="absolute inset-0" style={{ touchAction: "none" }} />
 
-      {/* info pill */}
-      <div
-        className="absolute top-[20px] left-[20px] z-[8] bg-[rgba(255,255,255,0.95)] backdrop-blur-[8px] rounded-[13px] px-[15px] py-[11px] flex items-center gap-[9px]"
-        style={{
-          boxShadow: "0 12px 30px -14px rgba(8,53,66,0.5)",
-          opacity: revealed ? 1 : 0,
-          transform: revealed ? "none" : "translateY(-10px)",
-          transition: "opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s",
-        }}
-      >
-        <b style={{ fontSize: 14, fontWeight: 800 }}>밤 9:41</b>
-        <span style={{ fontSize: 12, color: "var(--muted)" }}>기준 · 운영 중 {openCount}곳</span>
-      </div>
+      {/* info pill (desktop only — mobile has MobileTopBar in the same spot) */}
+      {!isMobile && (
+        <div
+          className="absolute top-[20px] left-[20px] z-[8] bg-[rgba(255,255,255,0.95)] backdrop-blur-[8px] rounded-[13px] px-[15px] py-[11px] flex items-center gap-[9px]"
+          style={{
+            boxShadow: "0 12px 30px -14px rgba(8,53,66,0.5)",
+            opacity: revealed ? 1 : 0,
+            transform: revealed ? "none" : "translateY(-10px)",
+            transition: "opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s",
+          }}
+        >
+          <b style={{ fontSize: 14, fontWeight: 800 }}>밤 9:41</b>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>기준 · 운영 중 {openCount}곳</span>
+        </div>
+      )}
 
       {/* recenter button */}
       <button
@@ -342,6 +347,9 @@ export default function MapView({
         style={{
           bottom: recenterBottom,
           boxShadow: "0 10px 24px -10px rgba(8,53,66,0.5)",
+          opacity: isMobile && sheetExpanded ? 0 : 1,
+          pointerEvents: isMobile && sheetExpanded ? "none" : "auto",
+          transition: "opacity 0.25s ease",
         }}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -17,9 +17,18 @@ interface Props {
   onCardEnter: (id: string) => void;
   onCardLeave: (id: string) => void;
   showToast: (msg: string) => void;
+  /** fires when the sheet settles into fully-expanded vs peek state */
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 const PEEK_FRAC = 0.5;
+
+// Exposes the sheet's current visible height as a CSS var so floating map
+// buttons (recenter, research) can dock just above it without prop-drilling
+// live drag position through React state on every pointer move.
+function setSheetVar(px: number) {
+  document.documentElement.style.setProperty("--sheet-h", `${Math.max(0, px)}px`);
+}
 
 export default function BottomSheet({
   pharmacies,
@@ -33,6 +42,7 @@ export default function BottomSheet({
   onCardEnter,
   onCardLeave,
   showToast,
+  onExpandChange,
 }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [translateY, setTranslateY] = useState("110%");
@@ -50,6 +60,7 @@ export default function BottomSheet({
     setAnimating(true);
     const peekY = getH() * PEEK_FRAC;
     setTranslateY(`${peekY}px`);
+    setSheetVar(getH() - peekY);
   }, [phase]);
 
   function onDown(e: React.PointerEvent) {
@@ -67,6 +78,7 @@ export default function BottomSheet({
     let y = baseY.current + (e.clientY - startY.current);
     y = Math.max(0, Math.min(h * PEEK_FRAC, y));
     setTranslateY(`${y}px`);
+    setSheetVar(h - y);
   }
 
   function onUp(e: React.PointerEvent) {
@@ -76,7 +88,11 @@ export default function BottomSheet({
     if (moved < -30) isUp.current = true;
     else if (moved > 30) isUp.current = false;
     setAnimating(true);
-    setTranslateY(isUp.current ? "0px" : `${getH() * PEEK_FRAC}px`);
+    const h = getH();
+    const finalY = isUp.current ? 0 : h * PEEK_FRAC;
+    setTranslateY(`${finalY}px`);
+    setSheetVar(h - finalY);
+    onExpandChange?.(isUp.current);
   }
 
   return (

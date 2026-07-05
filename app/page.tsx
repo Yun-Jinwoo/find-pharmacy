@@ -92,6 +92,7 @@ export default function Home() {
   const [searchCenter, setSearchCenter] = useState<Coords | null>(null);
   const [movedCenter, setMovedCenter] = useState<Coords | null>(null);
   const [viewportRadiusKm, setViewportRadiusKm] = useState(1);
+  const [sheetExpanded, setSheetExpanded] = useState(false);
   const [animKey, setAnimKey] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -186,6 +187,16 @@ export default function Home() {
 
   async function handleRegionConfirm(coords: Coords) {
     await loadAndStart(coords);
+  }
+
+  async function handleRecenterLocation() {
+    try {
+      const coords = await requestLocation();
+      await loadAndStart(coords);
+      showToast("현재 위치로 갱신했어요");
+    } catch {
+      showToast("위치를 가져올 수 없어요");
+    }
   }
 
   function switchState(s: AppState) {
@@ -300,11 +311,23 @@ export default function Home() {
           onPinClick={handleCardClick}
           onPinEnter={handleHoverEnter}
           onPinLeave={handleHoverLeave}
-          onRecenter={() => showToast("현재 위치로 이동했어요")}
+          onRecenter={handleRecenterLocation}
           onMapMove={handleMapMove}
+          sheetExpanded={sheetExpanded}
         />
         {movedCenter && phase === "listed" && (
-          <ResearchButton onClick={handleResearch} style={{ top: 168, left: "50%", transform: "translateX(-50%)", zIndex: 29 }} />
+          <ResearchButton
+            onClick={handleResearch}
+            style={{
+              top: 182,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 31,
+              opacity: sheetExpanded ? 0 : 1,
+              pointerEvents: sheetExpanded ? "none" : "auto",
+              transition: "opacity 0.25s ease",
+            }}
+          />
         )}
         <MobileTopBar
           phase={phase}
@@ -325,6 +348,7 @@ export default function Home() {
           onCardEnter={handleHoverEnter}
           onCardLeave={handleHoverLeave}
           showToast={showToast}
+          onExpandChange={setSheetExpanded}
         />
         <Toast message={toastMsg} />
         {searchOpen && (
@@ -389,7 +413,7 @@ export default function Home() {
         onPinClick={handleCardClick}
         onPinEnter={handleHoverEnter}
         onPinLeave={handleHoverLeave}
-        onRecenter={() => showToast("현재 위치로 이동했어요")}
+        onRecenter={handleRecenterLocation}
         onMapMove={handleMapMove}
       />
       {movedCenter && phase === "listed" && (
