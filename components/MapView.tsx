@@ -315,10 +315,10 @@ export default function MapView({
   }, [activeId]);
 
   function handleRecenter() {
-    onRecenter?.();
     const lat = userLat ?? FALLBACK_LAT;
     const lng = userLng ?? FALLBACK_LNG;
     mapRef.current?.setCenter(new window.kakao.maps.LatLng(lat, lng));
+    onRecenter?.();
   }
 
   const recenterBottom = isMobile ? "calc(var(--sheet-h, 0px) + 16px)" : 26;

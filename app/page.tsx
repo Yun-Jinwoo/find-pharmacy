@@ -189,14 +189,10 @@ export default function Home() {
     await loadAndStart(coords);
   }
 
-  async function handleRecenterLocation() {
-    try {
-      const coords = await requestLocation();
-      await loadAndStart(coords);
-      showToast("현재 위치로 갱신했어요");
-    } catch {
-      showToast("위치를 가져올 수 없어요");
-    }
+  // "내 위치로" just re-centers the map on the already-known location — it
+  // doesn't refetch GPS/pharmacy data, so drop the now-stale research prompt.
+  function handleRecenterView() {
+    setMovedCenter(null);
   }
 
   function switchState(s: AppState) {
@@ -311,7 +307,7 @@ export default function Home() {
           onPinClick={handleCardClick}
           onPinEnter={handleHoverEnter}
           onPinLeave={handleHoverLeave}
-          onRecenter={handleRecenterLocation}
+          onRecenter={handleRecenterView}
           onMapMove={handleMapMove}
           sheetExpanded={sheetExpanded}
         />
@@ -413,7 +409,7 @@ export default function Home() {
         onPinClick={handleCardClick}
         onPinEnter={handleHoverEnter}
         onPinLeave={handleHoverLeave}
-        onRecenter={handleRecenterLocation}
+        onRecenter={handleRecenterView}
         onMapMove={handleMapMove}
       />
       {movedCenter && phase === "listed" && (
