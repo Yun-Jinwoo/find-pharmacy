@@ -39,7 +39,9 @@ function calcStatus(startTime: unknown, endTime: unknown): PharmacyStatus {
 function formatCloseTime(endTime: unknown): string {
   const min = timeToMin(endTime);
   if (min < 0) return "운영시간 미제공";
-  const h = Math.floor(min / 60);
+  // 야간·24시간 약국은 endTime이 2400을 넘는 값(예: "2500" = 다음날 새벽 1시)으로
+  // 내려올 때가 있어, 시간대(오전/오후/밤) 계산 전에 0~23시로 정규화해야 한다.
+  const h = Math.floor(min / 60) % 24;
   const m = min % 60;
   const period = h < 12 ? "오전" : h < 18 ? "오후" : "밤";
   const dh = h > 12 ? h - 12 : h === 0 ? 12 : h;
