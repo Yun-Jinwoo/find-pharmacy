@@ -272,7 +272,7 @@ export default function Home() {
   // ── Overlay states ──────────────────────────────────────
   if (appState !== "loaded") {
     return (
-      <main className="relative h-screen overflow-hidden">
+      <main className="relative h-dvh overflow-hidden">
         <MapBackground />
         {appState === "permission" && (
           <LocationPermission
@@ -298,7 +298,7 @@ export default function Home() {
   // ── Mobile layout ───────────────────────────────────────
   if (isMobile) {
     return (
-      <main className="relative h-screen overflow-hidden">
+      <main className="relative h-dvh overflow-hidden">
         <MapView
           key={mapKey}
           pharmacies={pharmacies}

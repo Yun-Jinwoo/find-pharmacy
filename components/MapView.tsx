@@ -181,6 +181,14 @@ export default function MapView({
         });
         mapRef.current = map;
 
+        // Mobile: the bottom sheet permanently covers the bottom ~43% of the
+        // screen (86% sheet height × 50% peek, see BottomSheet.tsx) even at
+        // rest, so shift the view up by half that covered height to keep the
+        // centered coordinate inside the area that's actually visible.
+        if (isMobile) {
+          map.panBy(0, window.innerHeight * 0.215);
+        }
+
         // Notify parent when map is dragged to a new position
         window.kakao.maps.event.addListener(map, "dragend", () => {
           const c = map.getCenter();

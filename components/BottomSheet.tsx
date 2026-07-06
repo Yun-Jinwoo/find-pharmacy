@@ -30,6 +30,10 @@ function setSheetVar(px: number) {
   document.documentElement.style.setProperty("--sheet-h", `${Math.max(0, px)}px`);
 }
 
+function setHeaderVar(px: number) {
+  document.documentElement.style.setProperty("--sheet-header-h", `${Math.max(0, px)}px`);
+}
+
 export default function BottomSheet({
   pharmacies,
   phase,
@@ -45,6 +49,7 @@ export default function BottomSheet({
   onExpandChange,
 }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const [translateY, setTranslateY] = useState("110%");
   const [animating, setAnimating] = useState(true);
   const dragging = useRef(false);
@@ -58,6 +63,7 @@ export default function BottomSheet({
   useEffect(() => {
     if (phase !== "listed") return;
     setAnimating(true);
+    setHeaderVar(headerRef.current?.offsetHeight ?? 0);
     const peekY = getH() * PEEK_FRAC;
     setTranslateY(`${peekY}px`);
     setSheetVar(getH() - peekY);
@@ -105,72 +111,81 @@ export default function BottomSheet({
         boxShadow: "0 -16px 40px -20px rgba(8,53,66,0.45)",
         transform: `translateY(${translateY})`,
         transition: animating ? "transform 0.42s cubic-bezier(0.22,0.61,0.36,1)" : "none",
-        touchAction: "none",
         willChange: "transform",
       }}
     >
-      {/* drag grip */}
+      {/* fixed header block: grip + tabs + title (height measured for list sizing) */}
+      <div ref={headerRef} className="flex-none">
+        {/* drag grip */}
+        <div
+          className="flex justify-center cursor-grab"
+          style={{ padding: "11px 0 6px", touchAction: "none" }}
+          onPointerDown={onDown}
+          onPointerMove={onMove}
+          onPointerUp={onUp}
+          onPointerCancel={onUp}
+        >
+          <span className="rounded-full" style={{ width: 42, height: 5, background: "#d3dfe4", display: "block" }} />
+        </div>
+
+        {/* tabs */}
+        <div className="flex gap-0 mx-[16px] mb-[12px] border rounded-[12px] overflow-hidden" style={{ borderColor: "var(--line)" }}>
+          {(["all", "favorites"] as const).map(tab => {
+            const isActive = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => onTabChange(tab)}
+                className="flex-1 border-0 cursor-pointer font-bold flex items-center justify-center gap-[6px]"
+                style={{
+                  fontSize: 13,
+                  padding: "10px 0",
+                  background: isActive ? "var(--primary)" : "transparent",
+                  color: isActive ? "#fff" : "var(--muted)",
+                  transition: "background 0.15s, color 0.15s",
+                }}
+              >
+                {tab === "favorites" && (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill={isActive ? "#fff" : "none"} stroke={isActive ? "#fff" : "#94a3b8"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                )}
+                {tab === "all" ? "전체" : "즐겨찾기"}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* header */}
+        <div className="px-[20px] pb-[12px]">
+          <h1 className="m-0 tracking-[-0.4px]" style={{ fontSize: 19, fontWeight: 800 }}>
+            {activeTab === "favorites" ? (
+              <>즐겨찾기 <em className="not-italic" style={{ color: "var(--primary)" }}>{pharmacies.length}곳</em></>
+            ) : (
+              <>주변 운영 중 약국 <em className="not-italic" style={{ color: "var(--primary)" }}>{openCount}곳</em></>
+            )}
+          </h1>
+          <p className="flex items-center gap-[6px] m-0 mt-[4px]" style={{ fontSize: 12.5, color: "var(--muted)" }}>
+            <span
+              className="rounded-full flex-none"
+              style={{ width: 7, height: 7, background: "var(--open)", animation: "beat 1.8s infinite" }}
+            />
+            가까운 순
+          </p>
+        </div>
+      </div>
+
+      {/* scrollable card list — height pinned to the currently visible sheet
+          area (not the full 86% panel) so content past the peek line is a
+          real overflow and can be scrolled into view instead of being
+          clipped off-screen with nothing to scroll to reveal it */}
       <div
-        className="flex-none flex justify-center cursor-grab"
-        style={{ padding: "11px 0 6px", touchAction: "none" }}
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onPointerCancel={onUp}
-      >
-        <span className="rounded-full" style={{ width: 42, height: 5, background: "#d3dfe4", display: "block" }} />
-      </div>
-
-      {/* tabs */}
-      <div className="flex-none flex gap-0 mx-[16px] mb-[12px] border rounded-[12px] overflow-hidden" style={{ borderColor: "var(--line)" }}>
-        {(["all", "favorites"] as const).map(tab => {
-          const isActive = activeTab === tab;
-          return (
-            <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
-              className="flex-1 border-0 cursor-pointer font-bold flex items-center justify-center gap-[6px]"
-              style={{
-                fontSize: 13,
-                padding: "10px 0",
-                background: isActive ? "var(--primary)" : "transparent",
-                color: isActive ? "#fff" : "var(--muted)",
-                transition: "background 0.15s, color 0.15s",
-              }}
-            >
-              {tab === "favorites" && (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill={isActive ? "#fff" : "none"} stroke={isActive ? "#fff" : "#94a3b8"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-              )}
-              {tab === "all" ? "전체" : "즐겨찾기"}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* header */}
-      <div className="flex-none px-[20px] pb-[12px]">
-        <h1 className="m-0 tracking-[-0.4px]" style={{ fontSize: 19, fontWeight: 800 }}>
-          {activeTab === "favorites" ? (
-            <>즐겨찾기 <em className="not-italic" style={{ color: "var(--primary)" }}>{pharmacies.length}곳</em></>
-          ) : (
-            <>주변 운영 중 약국 <em className="not-italic" style={{ color: "var(--primary)" }}>{openCount}곳</em></>
-          )}
-        </h1>
-        <p className="flex items-center gap-[6px] m-0 mt-[4px]" style={{ fontSize: 12.5, color: "var(--muted)" }}>
-          <span
-            className="rounded-full flex-none"
-            style={{ width: 7, height: 7, background: "var(--open)", animation: "beat 1.8s infinite" }}
-          />
-          가까운 순
-        </p>
-      </div>
-
-      {/* scrollable card list */}
-      <div
-        className="flex-1 overflow-y-auto px-[14px] pb-[30px]"
-        style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+        className="flex-none overflow-y-auto px-[14px] pb-[30px]"
+        style={{
+          height: "calc(var(--sheet-h, 0px) - var(--sheet-header-h, 0px))",
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-y",
+        } as React.CSSProperties}
       >
         {pharmacies.length === 0 && activeTab === "favorites" ? (
           <div className="flex flex-col items-center justify-center h-full" style={{ color: "var(--muted)", paddingTop: 32 }}>
