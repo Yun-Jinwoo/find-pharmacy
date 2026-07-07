@@ -6,6 +6,15 @@ import "./landing.css";
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string | number>;
 
+/* 반복 유틸리티 묶음 — 정적 스타일은 Tailwind, 연출은 landing.css의 클래스가 담당 */
+const WRAP = "mx-auto max-w-[1100px] px-5";
+const EYEBROW =
+  "inline-flex items-center gap-[7px] text-[12.5px] font-extrabold uppercase tracking-[.16em] text-[#22D3EE] before:h-[1.5px] before:w-[18px] before:bg-[#22D3EE] before:content-['']";
+const BTN =
+  "inline-flex items-center justify-center gap-2 rounded-[11px] font-extrabold tracking-[-.2px] [transition:translate_.18s_cubic-bezier(0.18,0.9,0.32,1.4),scale_.18s_cubic-bezier(0.18,0.9,0.32,1.4),box-shadow_.2s,background-color_.2s] active:scale-[.97]";
+const BTN_PRIMARY =
+  "bg-[#0B8FAC] text-white shadow-[0_14px_30px_-12px_rgba(11,143,172,.75)] hover:-translate-y-[2px] hover:bg-[#086B82] hover:shadow-[0_18px_34px_-12px_rgba(11,143,172,.85)]";
+
 /* 약국 십자 아이콘 (핀 내부) */
 function CrossIcon({ size, strokeWidth = 2.4 }: { size: number; strokeWidth?: number }) {
   return (
@@ -23,7 +32,7 @@ function CrossIcon({ size, strokeWidth = 2.4 }: { size: number; strokeWidth?: nu
   );
 }
 
-/* 히어로 핀 — hover 툴팁(htip) 포함 */
+/* 히어로 핀 — hover 툴팁(htip) 포함. 핀 조형/드롭은 landing.css */
 function HeroPin({
   tone,
   left,
@@ -69,6 +78,7 @@ function PhonePin({ cls, left, top, pd }: { cls: string; left: string; top: stri
   );
 }
 
+/* 상태 뱃지 — JS(setOff)가 className을 통째로 바꾸므로 CSS 클래스 기반 유지 */
 function Badge({ status, children }: { status: "open" | "closing" | "closed"; children: React.ReactNode }) {
   return (
     <span className={`badge ${status}`}>
@@ -387,8 +397,8 @@ export default function LandingClient() {
   return (
     <div className="lp" ref={rootRef}>
       {/* ================================================================ HERO */}
-      <section className="hero" id="hero">
-        <div className="hero-map" aria-hidden="true">
+      <section className="hero relative flex min-h-svh flex-col overflow-hidden bg-[#0C2A33] text-white" id="hero">
+        <div className="hero-map absolute inset-0 overflow-hidden" aria-hidden="true">
           {/* 밤 지도 : 블록 + 도로 */}
           <svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
             <rect width="1400" height="900" fill="#0C2A33" />
@@ -462,27 +472,31 @@ export default function LandingClient() {
           <div className="hero-shade" />
         </div>
 
-        <div className="wrap hero-body">
-          <span className="clock-chip">
+        {/* 본문 — 화면 하단 정렬 */}
+        <div className={`${WRAP} relative z-[5] mt-auto pb-[max(8vh,72px)]`}>
+          <span className="clock-chip inline-flex items-center gap-2 rounded-full border border-[rgba(34,211,238,.3)] bg-[rgba(14,42,51,.72)] px-[15px] py-2 text-[13.5px] font-bold text-[#cfeef5] backdrop-blur-[6px]">
             <span className="dot" />
-            지금 <b className="num" id="liveClock">밤 9:41</b> · 운영 중인 약국만 표시
+            지금 <b className="text-[14.5px] text-white tabular-nums" id="liveClock">밤 9:41</b> · 운영 중인 약국만 표시
           </span>
-          <h1>
+          <h1 className="mt-[18px] mb-[14px] text-[clamp(32px,6.4vw,58px)] font-extrabold leading-[1.22] tracking-[-.045em] text-balance">
             지금 문 연 약국만,
             <br />
-            <em>가까운 순</em>으로.
+            <em className="not-italic text-[#22D3EE]">가까운 순</em>으로.
           </h1>
-          <p className="sub">
+          <p className="sub max-w-[34em] text-[clamp(15px,2.2vw,17.5px)] font-medium text-[rgba(223,240,244,.82)]">
             밤 11시에도, 연휴 한복판에도. 현재 위치에서 지금 운영 중인 약국을 지도에서 바로 확인하세요.
           </p>
-          <div className="hero-cta">
-            <Link className="btn btn-primary" href="/">
+          <div className="hero-cta mt-[26px] flex flex-wrap gap-[11px]">
+            <Link className={`${BTN} ${BTN_PRIMARY} px-[26px] py-[15px] text-[15.5px]`} href="/">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 11l19-9-9 19-2-8-8-2Z" />
               </svg>
               내 주변 약국 찾기
             </Link>
-            <a className="btn btn-ghost" href="#problem">
+            <a
+              className={`${BTN} border-[1.5px] border-[rgba(255,255,255,.28)] px-[26px] py-[15px] text-[15.5px] text-[#e6f6fa] hover:-translate-y-[2px] hover:bg-[rgba(255,255,255,.09)]`}
+              href="#problem"
+            >
               왜 필요한가요
             </a>
           </div>
@@ -493,89 +507,107 @@ export default function LandingClient() {
       </section>
 
       {/* ================================================================ 문제 제기 */}
-      <section className="problem" id="problem">
-        <div className="wrap grid">
+      <section className="problem relative bg-[linear-gradient(to_bottom,#081c23,#0C2A33_30%,#0C2A33)] pt-[110px] pb-[120px] text-white" id="problem">
+        <div className={`${WRAP} grid items-center gap-12 min-[880px]:grid-cols-[1.05fr_.95fr] min-[880px]:gap-16`}>
           <div>
-            <span className="eyebrow" data-reveal>
+            <span className={EYEBROW} data-reveal>
               이런 적, 있으시죠
             </span>
-            <h2 data-reveal style={{ "--d": ".08s" } as CSSVars}>
-              &lsquo;약국&rsquo;을 검색하면 <span className="num">42곳</span>.
+            <h2
+              className="mt-4 mb-[18px] text-[clamp(26px,4.6vw,42px)] font-extrabold leading-[1.3] tracking-[-.04em] text-balance"
+              data-reveal
+              style={{ "--d": ".08s" } as CSSVars}
+            >
+              &lsquo;약국&rsquo;을 검색하면 <span className="text-[#22D3EE] tabular-nums">42곳</span>.
               <br />
               지금 문 연 곳은 어디죠?
             </h2>
-            <p data-reveal style={{ "--d": ".16s" } as CSSVars}>
+            <p className="max-w-[32em] text-[16px] text-[rgba(214,233,238,.78)]" data-reveal style={{ "--d": ".16s" } as CSSVars}>
               아이 열이 오르는 밤, 지도 앱은 약국을 수십 곳 보여주지만{" "}
-              <b style={{ color: "#fff" }}>이 시간에 문을 연 곳</b>이 어딘지는 알려주지 않아요. 전화를 한 통씩
+              <b className="text-white">이 시간에 문을 연 곳</b>이 어딘지는 알려주지 않아요. 전화를 한 통씩
               돌리는 사이 밤은 깊어가죠.
             </p>
-            <div className="big-clock num" data-reveal style={{ "--d": ".24s" } as CSSVars} aria-label="밤 11시 47분">
+            <div
+              className="mt-[34px] flex flex-col items-start gap-[14px] text-[clamp(56px,9vw,84px)] font-extrabold leading-none tracking-[-.03em] text-white tabular-nums"
+              data-reveal
+              style={{ "--d": ".24s" } as CSSVars}
+              aria-label="밤 11시 47분"
+            >
               <span>
                 <span id="pClockH">23</span>
                 <span className="colon">:</span>
                 <span id="pClockM">47</span>
               </span>
-              <small>아이 해열제가 떨어졌다</small>
+              <small className="text-[17px] font-bold leading-normal tracking-[.01em] text-[#EA9006]">
+                아이 해열제가 떨어졌다
+              </small>
             </div>
           </div>
 
           <div
-            className="dying-list"
+            className="dying-list rounded-[26px] border border-[rgba(255,255,255,.08)] bg-[rgba(10,34,42,.55)] p-[22px] backdrop-blur-[4px]"
             data-reveal
             style={{ "--d": ".2s" } as CSSVars}
             id="dyingList"
             aria-label="약국에 전화를 돌리는 상황 데모"
           >
-            <header>
+            <header className="mb-[14px] flex items-center justify-between text-[13px] font-bold text-[rgba(255,255,255,.6)]">
               <span>전화 돌리는 중&hellip;</span>
               <span>
-                <span className="num" id="dyingCount">5</span>곳 남음
+                <span className="text-white tabular-nums" id="dyingCount">5</span>곳 남음
               </span>
             </header>
-            <div className="d-card">
-              <span className="name">늘푸른약국</span>
+            <div className="d-card mb-[9px] flex items-center gap-[10px] rounded-[15px] bg-white px-[15px] py-[13px] text-[#0E2A33] last:mb-0">
+              <span className="text-[14.5px] font-bold tracking-[-.3px]">늘푸른약국</span>
               <Badge status="closing">확인 중</Badge>
-              <span className="hours">신호 감&hellip;</span>
+              <span className="hours ml-auto text-[12.5px] font-semibold text-[#5E7C88]">신호 감&hellip;</span>
             </div>
-            <div className="d-card">
-              <span className="name">중앙온누리약국</span>
+            <div className="d-card mb-[9px] flex items-center gap-[10px] rounded-[15px] bg-white px-[15px] py-[13px] text-[#0E2A33] last:mb-0">
+              <span className="text-[14.5px] font-bold tracking-[-.3px]">중앙온누리약국</span>
               <Badge status="closing">확인 중</Badge>
-              <span className="hours">신호 감&hellip;</span>
+              <span className="hours ml-auto text-[12.5px] font-semibold text-[#5E7C88]">신호 감&hellip;</span>
             </div>
-            <div className="d-card">
-              <span className="name">행복한약국</span>
+            <div className="d-card mb-[9px] flex items-center gap-[10px] rounded-[15px] bg-white px-[15px] py-[13px] text-[#0E2A33] last:mb-0">
+              <span className="text-[14.5px] font-bold tracking-[-.3px]">행복한약국</span>
               <Badge status="closing">확인 중</Badge>
-              <span className="hours">신호 감&hellip;</span>
+              <span className="hours ml-auto text-[12.5px] font-semibold text-[#5E7C88]">신호 감&hellip;</span>
             </div>
-            <div className="d-card found">
-              <span className="name">홈타운약국</span>
+            <div className="d-card found mb-[9px] flex items-center gap-[10px] rounded-[15px] bg-white px-[15px] py-[13px] text-[#0E2A33] last:mb-0">
+              <span className="text-[14.5px] font-bold tracking-[-.3px]">홈타운약국</span>
               <Badge status="open">운영 중</Badge>
-              <span className="dist num">320m · 밤 12시까지</span>
+              <span className="text-[14px] font-extrabold text-[#086B82] tabular-nums">320m · 밤 12시까지</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ================================================================ 기능 */}
-      <section className="features" id="features">
-        <div className="wrap">
-          <div className="head">
-            <span className="eyebrow" data-reveal>
+      <section
+        className="features relative bg-[#E8EFF2] pt-[104px] pb-24 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-20 before:bg-[linear-gradient(to_bottom,#0C2A33,transparent)] before:opacity-[.14] before:content-['']"
+        id="features"
+      >
+        <div className={WRAP}>
+          <div className="mb-[52px] max-w-[620px]">
+            <span className={EYEBROW} data-reveal>
               핵심 기능
             </span>
-            <h2 data-reveal style={{ "--d": ".08s" } as CSSVars}>
+            <h2
+              className="mt-[14px] mb-3 text-[clamp(26px,4.4vw,40px)] font-extrabold leading-[1.32] tracking-[-.04em] text-balance"
+              data-reveal
+              style={{ "--d": ".08s" } as CSSVars}
+            >
               헤매는 시간을 지도가 대신 줄여줍니다
             </h2>
-            <p data-reveal style={{ "--d": ".16s" } as CSSVars}>
+            <p className="text-[16px] text-[#5E7C88]" data-reveal style={{ "--d": ".16s" } as CSSVars}>
               복잡한 기능 대신, 급할 때 실제로 쓰게 되는 네 가지에 집중했어요.
             </p>
           </div>
 
-          <div className="f-grid">
+          <div className="grid gap-[18px] min-[700px]:grid-cols-2">
             {/* ① 지도 */}
-            <article className="f-card" data-reveal>
-              <div className="f-stage stage-map" data-stage="map">
-                <svg className="bgmap" viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <article className="f-card relative overflow-hidden rounded-[15px] border border-[#E4EDF1] bg-white p-[26px]" data-reveal>
+              <div className="f-stage stage-map relative mb-1 h-[172px] overflow-hidden rounded-xl bg-[#0C2A33]" data-stage="map">
+                <svg className="absolute top-[-20%] left-[-20%] h-[140%] w-[140%]" viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <rect width="500" height="260" fill="#0C2A33" />
                   <g fill="#0f333e">
                     <rect x="30" y="20" width="120" height="80" rx="7" />
@@ -594,53 +626,82 @@ export default function LandingClient() {
                 <MiniPin tone="g" left="34%" top="52%" pd=".15s" />
                 <MiniPin tone="a" left="62%" top="38%" pd=".32s" />
                 <MiniPin tone="g" left="80%" top="66%" pd=".49s" />
-                <span className="mini-tip" style={{ left: "34%", top: "52%" }}>
+                <span
+                  className="mini-tip absolute whitespace-nowrap rounded-[7px] bg-[#0e2a33] px-2 py-1 text-[11px] font-bold text-white"
+                  style={{ left: "34%", top: "52%" }}
+                >
                   여기가 제일 가까워요 · 290m
                 </span>
               </div>
-              <div className="f-ico" aria-hidden="true">
+              <div className="grid h-11 w-11 place-items-center rounded-[13px] bg-[rgba(11,143,172,.1)] text-[#0B8FAC]" aria-hidden="true">
                 <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </div>
-              <h3>지도에서 운영 상태가 색으로</h3>
-              <p>초록은 운영 중, 주황은 곧 마감. 목록을 읽기 전에 지도만 봐도 갈 곳이 보여요. 핀을 누르면 바로 상세로.</p>
+              <h3 className="mt-[18px] mb-2 text-[19px] font-extrabold tracking-[-.4px]">지도에서 운영 상태가 색으로</h3>
+              <p className="text-[14.5px] leading-[1.65] text-[#5E7C88]">
+                초록은 운영 중, 주황은 곧 마감. 목록을 읽기 전에 지도만 봐도 갈 곳이 보여요. 핀을 누르면 바로 상세로.
+              </p>
             </article>
 
             {/* ② 필터 */}
-            <article className="f-card" data-reveal style={{ "--d": ".08s" } as CSSVars}>
-              <div className="f-stage stage-filter light" data-stage="filter">
-                <div className="chips">
-                  <span className="chip on" id="chipNight">심야 운영</span>
-                  <span className="chip" id="chip24">24시간</span>
+            <article
+              className="f-card relative overflow-hidden rounded-[15px] border border-[#E4EDF1] bg-white p-[26px]"
+              data-reveal
+              style={{ "--d": ".08s" } as CSSVars}
+            >
+              <div
+                className="f-stage stage-filter relative mb-1 flex h-[172px] flex-col gap-2 overflow-hidden rounded-xl border border-[#E4EDF1] bg-[#f2f7f9] p-[14px]"
+                data-stage="filter"
+              >
+                <div className="flex gap-[7px]">
+                  <span className="chip on rounded-full border border-[#E4EDF1] bg-white px-[13px] py-[6px] text-[12.5px] font-bold text-[#5E7C88]" id="chipNight">
+                    심야 운영
+                  </span>
+                  <span className="chip rounded-full border border-[#E4EDF1] bg-white px-[13px] py-[6px] text-[12.5px] font-bold text-[#5E7C88]" id="chip24">
+                    24시간
+                  </span>
                 </div>
-                <div className="mini-row" data-tag="night24">
+                <div className="mini-row flex items-center gap-2 rounded-[11px] border border-[#E4EDF1] bg-white px-3 py-2 text-[12.5px] font-bold tracking-[-.2px]" data-tag="night24">
                   비무브약국24 <Badge status="open">운영 중</Badge>
-                  <span className="m-dist num">1.2km</span>
+                  <span className="ml-auto text-[12px] font-extrabold text-[#086B82] tabular-nums">1.2km</span>
                 </div>
-                <div className="mini-row" data-tag="night">
+                <div className="mini-row flex items-center gap-2 rounded-[11px] border border-[#E4EDF1] bg-white px-3 py-2 text-[12.5px] font-bold tracking-[-.2px]" data-tag="night">
                   홈타운약국 <Badge status="open">운영 중</Badge>
-                  <span className="m-dist num">320m</span>
+                  <span className="ml-auto text-[12px] font-extrabold text-[#086B82] tabular-nums">320m</span>
                 </div>
-                <div className="mini-row" data-tag="day">
+                <div className="mini-row flex items-center gap-2 rounded-[11px] border border-[#E4EDF1] bg-white px-3 py-2 text-[12.5px] font-bold tracking-[-.2px]" data-tag="day">
                   신현대약국 <Badge status="closed">영업종료</Badge>
-                  <span className="m-dist num">290m</span>
+                  <span className="ml-auto text-[12px] font-extrabold text-[#086B82] tabular-nums">290m</span>
                 </div>
               </div>
-              <div className="f-ico" aria-hidden="true">
+              <div className="grid h-11 w-11 place-items-center rounded-[13px] bg-[rgba(11,143,172,.1)] text-[#0B8FAC]" aria-hidden="true">
                 <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
                 </svg>
               </div>
-              <h3>심야 · 24시간 필터</h3>
-              <p>밤 10시가 넘었다면 심야 운영 약국만 남기세요. 탭 한 번이면 지금 갈 수 없는 곳이 목록에서 사라져요.</p>
+              <h3 className="mt-[18px] mb-2 text-[19px] font-extrabold tracking-[-.4px]">심야 · 24시간 필터</h3>
+              <p className="text-[14.5px] leading-[1.65] text-[#5E7C88]">
+                밤 10시가 넘었다면 심야 운영 약국만 남기세요. 탭 한 번이면 지금 갈 수 없는 곳이 목록에서 사라져요.
+              </p>
             </article>
 
             {/* ③ 즐겨찾기 */}
-            <article className="f-card" data-reveal style={{ "--d": ".16s" } as CSSVars}>
-              <div className="f-stage stage-fav light" data-stage="fav">
-                <button className="fav-heart" id="favHeart" aria-label="즐겨찾기 토글 데모">
+            <article
+              className="f-card relative overflow-hidden rounded-[15px] border border-[#E4EDF1] bg-white p-[26px]"
+              data-reveal
+              style={{ "--d": ".16s" } as CSSVars}
+            >
+              <div
+                className="f-stage stage-fav relative mb-1 grid h-[172px] place-items-center overflow-hidden rounded-xl border border-[#E4EDF1] bg-[#f2f7f9]"
+                data-stage="fav"
+              >
+                <button
+                  className="fav-heart relative grid h-[74px] w-[74px] cursor-pointer place-items-center rounded-full border border-[#E4EDF1] bg-white"
+                  id="favHeart"
+                  aria-label="즐겨찾기 토글 데모"
+                >
                   <span className="ring" aria-hidden="true" />
                   <svg width="30" height="30" viewBox="0 0 24 24">
                     <path
@@ -651,19 +712,25 @@ export default function LandingClient() {
                 </button>
                 <span className="fav-toast" id="favToast">즐겨찾기에 저장됨</span>
               </div>
-              <div className="f-ico" aria-hidden="true">
+              <div className="grid h-11 w-11 place-items-center rounded-[13px] bg-[rgba(11,143,172,.1)] text-[#0B8FAC]" aria-hidden="true">
                 <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </div>
-              <h3>우리 동네 단골 약국은 하트로</h3>
-              <p>자주 가는 약국을 저장해두면 다음 급한 순간엔 검색 없이 바로. 즐겨찾기 탭에서 운영 여부만 확인하면 끝.</p>
+              <h3 className="mt-[18px] mb-2 text-[19px] font-extrabold tracking-[-.4px]">우리 동네 단골 약국은 하트로</h3>
+              <p className="text-[14.5px] leading-[1.65] text-[#5E7C88]">
+                자주 가는 약국을 저장해두면 다음 급한 순간엔 검색 없이 바로. 즐겨찾기 탭에서 운영 여부만 확인하면 끝.
+              </p>
             </article>
 
             {/* ④ 길찾기 */}
-            <article className="f-card" data-reveal style={{ "--d": ".24s" } as CSSVars}>
-              <div className="f-stage stage-route" data-stage="route">
-                <svg className="bgmap" viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <article
+              className="f-card relative overflow-hidden rounded-[15px] border border-[#E4EDF1] bg-white p-[26px]"
+              data-reveal
+              style={{ "--d": ".24s" } as CSSVars}
+            >
+              <div className="f-stage stage-route relative mb-1 h-[172px] overflow-hidden rounded-xl bg-[#0C2A33]" data-stage="route">
+                <svg className="absolute top-[-20%] left-[-20%] h-[140%] w-[140%]" viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <rect width="500" height="260" fill="#0C2A33" />
                   <g fill="#0f333e">
                     <rect x="40" y="30" width="130" height="80" rx="7" />
@@ -679,53 +746,63 @@ export default function LandingClient() {
                     <path d="M365 0 V260" strokeWidth="6" />
                   </g>
                 </svg>
-                <svg
-                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-                  viewBox="0 0 500 260"
-                  preserveAspectRatio="xMidYMid slice"
-                  aria-hidden="true"
-                >
+                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 500 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                   <path className="route-path route-len" style={{ "--len": 520 } as CSSVars} d="M85 205 H195 V130 H320 V72 H395" />
                 </svg>
                 <span className="me" style={{ left: "17%", top: "79%", width: 12, height: 12 }} />
                 <MiniPin tone="g" left="79%" top="28%" pd=".1s" />
-                <span className="walk-label num" style={{ left: "42%", top: "44%" }}>
+                <span className="walk-label tabular-nums" style={{ left: "42%", top: "44%" }}>
                   도보 4분 · 290m
                 </span>
               </div>
-              <div className="f-ico" aria-hidden="true">
+              <div className="grid h-11 w-11 place-items-center rounded-[13px] bg-[rgba(11,143,172,.1)] text-[#0B8FAC]" aria-hidden="true">
                 <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 11l19-9-9 19-2-8-8-2Z" />
                 </svg>
               </div>
-              <h3>전화 · 길찾기 한 번에</h3>
-              <p>카드에서 바로 전화를 걸거나 카카오맵 도보 길안내로 이어져요. 앱을 오가며 주소를 복사할 필요가 없어요.</p>
+              <h3 className="mt-[18px] mb-2 text-[19px] font-extrabold tracking-[-.4px]">전화 · 길찾기 한 번에</h3>
+              <p className="text-[14.5px] leading-[1.65] text-[#5E7C88]">
+                카드에서 바로 전화를 걸거나 카카오맵 도보 길안내로 이어져요. 앱을 오가며 주소를 복사할 필요가 없어요.
+              </p>
             </article>
           </div>
         </div>
       </section>
 
       {/* ================================================================ 데모 */}
-      <section className="demo" id="demo">
-        <div className="wrap">
-          <div className="demo-head">
-            <span className="eyebrow" data-reveal>
+      <section className="demo bg-[#E8EFF2] pt-5 pb-[110px]" id="demo">
+        <div className={WRAP}>
+          <div className="mb-[26px] max-w-[620px]">
+            <span className={EYEBROW} data-reveal>
               실제 화면
             </span>
-            <h2 data-reveal style={{ "--d": ".08s" } as CSSVars}>
+            <h2
+              className="mt-[14px] mb-3 text-[clamp(26px,4.4vw,40px)] font-extrabold leading-[1.32] tracking-[-.04em]"
+              data-reveal
+              style={{ "--d": ".08s" } as CSSVars}
+            >
               열자마자 찾기까지, 딱 세 걸음
             </h2>
-            <p data-reveal style={{ "--d": ".16s" } as CSSVars}>
+            <p className="text-[16px] text-[#5E7C88]" data-reveal style={{ "--d": ".16s" } as CSSVars}>
               스크롤을 내리면 실제 앱의 흐름을 그대로 볼 수 있어요.
             </p>
           </div>
 
-          <div className="demo-grid">
-            <div className="demo-phone-wrap" data-reveal>
-              <div className="phone" id="phone" data-step="1" role="img" aria-label="약국 어디가 앱 화면 데모">
-                <div className="screen">
-                  <div className="bgmap-wrap" aria-hidden="true">
-                    <svg viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg">
+          <div className="grid gap-2 min-[880px]:grid-cols-[1fr_420px] min-[880px]:items-start min-[880px]:gap-[70px]">
+            <div
+              className="sticky top-3 z-[2] flex justify-center pt-2 pb-[18px] min-[880px]:order-2 min-[880px]:top-[calc(50vh-330px)] min-[880px]:pt-0 min-[880px]:pb-0"
+              data-reveal
+            >
+              <div
+                className="phone relative aspect-[310/640] w-[min(310px,78vw)] rounded-[42px] bg-[#04141a] p-[11px] shadow-[0_34px_70px_-30px_rgba(8,40,50,.6),0_0_0_1.5px_rgba(8,40,50,.18)] after:absolute after:top-[22px] after:left-1/2 after:z-30 after:h-6 after:w-[84px] after:-translate-x-1/2 after:rounded-full after:bg-[#04141a] after:content-['']"
+                id="phone"
+                data-step="1"
+                role="img"
+                aria-label="약국 어디가 앱 화면 데모"
+              >
+                <div className="relative h-full w-full overflow-hidden rounded-[32px] bg-[#0C2A33]">
+                  <div className="absolute inset-0" aria-hidden="true">
+                    <svg className="absolute top-[-30%] left-[-40%] h-[160%] w-[180%]" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg">
                       <rect width="500" height="700" fill="#0C2A33" />
                       <g fill="#0f333e">
                         <rect x="30" y="40" width="140" height="100" rx="8" />
@@ -750,11 +827,11 @@ export default function LandingClient() {
                     </svg>
                   </div>
 
-                  <div className="p-chip">
+                  <div className="p-chip absolute top-14 left-1/2 z-20 flex -translate-x-1/2 items-center gap-[6px] whitespace-nowrap rounded-full border border-[rgba(34,211,238,.3)] bg-[rgba(14,42,51,.85)] px-[13px] py-[7px] text-[11.5px] font-bold text-[#dff3f8]">
                     <span className="spinner" data-s1="" />
                     <span data-s1="">현재 위치 확인 중&hellip;</span>
                     <span className="dot" data-alt="" />
-                    <b data-alt="" className="num">지금 운영 중 12곳</b>
+                    <b data-alt="" className="tabular-nums">지금 운영 중 12곳</b>
                   </div>
 
                   <span className="p-me" aria-hidden="true" />
@@ -764,37 +841,37 @@ export default function LandingClient() {
                     <path style={{ "--len": 430 } as CSSVars} d="M155 218 V300 H92 V385 H60" />
                   </svg>
 
-                  <div className="p-pins" aria-hidden="true">
+                  <div className="p-pins absolute inset-0 z-[6]" aria-hidden="true">
                     <PhonePin cls="g hot" left="19%" top="60%" pd=".05s" />
                     <PhonePin cls="a dim" left="72%" top="26%" pd=".2s" />
                     <PhonePin cls="g dim" left="65%" top="55%" pd=".35s" />
                     <PhonePin cls="g dim" left="36%" top="24%" pd=".5s" />
                   </div>
 
-                  <div className="p-sheet">
-                    <div className="grab" aria-hidden="true" />
-                    <h4>
-                      주변 운영 중 약국 <b className="num">12곳</b>
+                  <div className="p-sheet absolute inset-x-0 bottom-0 z-10 rounded-t-[26px] bg-white px-[14px] pt-[10px] pb-4 shadow-[0_-18px_40px_-18px_rgba(8,40,50,.45)]">
+                    <div className="mx-auto mt-[2px] mb-[10px] h-1 w-11 rounded-full bg-[#d6e2e8]" aria-hidden="true" />
+                    <h4 className="mb-[9px] text-[13.5px] font-extrabold tracking-[-.3px]">
+                      주변 운영 중 약국 <b className="text-[#0B8FAC] tabular-nums">12곳</b>
                     </h4>
-                    <div className="p-card first">
-                      <div className="r1">
-                        <span className="nm">홈타운약국</span>
+                    <div className="p-card first mb-2 rounded-[13px] border border-[#E4EDF1] px-3 py-[10px] last:mb-0">
+                      <div className="flex items-center gap-[7px]">
+                        <span className="text-[13.5px] font-extrabold tracking-[-.3px]">홈타운약국</span>
                         <Badge status="open">운영 중</Badge>
                       </div>
-                      <div className="r2">
-                        <span className="hrs">밤 12시까지</span>
-                        <span className="dst num">
-                          <span data-count="320">0</span>m<small>도보 5분</small>
+                      <div className="mt-[3px] flex items-center justify-between">
+                        <span className="text-[11.5px] font-semibold text-[#3a5560]">밤 12시까지</span>
+                        <span className="text-[13.5px] font-extrabold text-[#086B82] tabular-nums">
+                          <span data-count="320">0</span>m<small className="ml-1 text-[10px] font-semibold text-[#9fb3bc]">도보 5분</small>
                         </span>
                       </div>
-                      <div className="p-actions">
-                        <button className="call">
+                      <div className="p-actions flex gap-[7px] overflow-hidden">
+                        <button className="pointer-events-none flex flex-1 items-center justify-center gap-1 rounded-[9px] bg-[#eef4f6] text-[11.5px] font-extrabold text-[#086B82]">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                             <path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
                           </svg>
                           전화
                         </button>
-                        <button className="nav">
+                        <button className="pointer-events-none flex flex-1 items-center justify-center gap-1 rounded-[9px] bg-[#0B8FAC] text-[11.5px] font-extrabold text-white">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 11l19-9-9 19-2-8-8-2Z" />
                           </svg>
@@ -802,15 +879,15 @@ export default function LandingClient() {
                         </button>
                       </div>
                     </div>
-                    <div className="p-card second">
-                      <div className="r1">
-                        <span className="nm">신현대약국</span>
+                    <div className="p-card second mb-2 rounded-[13px] border border-[#E4EDF1] px-3 py-[10px] last:mb-0">
+                      <div className="flex items-center gap-[7px]">
+                        <span className="text-[13.5px] font-extrabold tracking-[-.3px]">신현대약국</span>
                         <Badge status="closing">곧 마감</Badge>
                       </div>
-                      <div className="r2">
-                        <span className="hrs">밤 11시 30분까지</span>
-                        <span className="dst num">
-                          <span data-count="290">0</span>m<small>도보 4분</small>
+                      <div className="mt-[3px] flex items-center justify-between">
+                        <span className="text-[11.5px] font-semibold text-[#3a5560]">밤 11시 30분까지</span>
+                        <span className="text-[13.5px] font-extrabold text-[#086B82] tabular-nums">
+                          <span data-count="290">0</span>m<small className="ml-1 text-[10px] font-semibold text-[#9fb3bc]">도보 4분</small>
                         </span>
                       </div>
                     </div>
@@ -819,21 +896,42 @@ export default function LandingClient() {
               </div>
             </div>
 
-            <div className="demo-steps">
-              <div className="step" data-go="1">
-                <span className="no num">1</span>
-                <h3>위치 허용, 그걸로 끝</h3>
-                <p>열자마자 현재 위치를 잡고 주변을 스캔해요. 회원가입도, 설치도 없어요. 위치를 켜기 어려우면 동네 이름으로도 찾을 수 있어요.</p>
+            <div className="min-[880px]:order-1 min-[880px]:pt-[8vh]">
+              <div
+                className="step mb-1 py-4 min-[880px]:mb-0 min-[880px]:flex min-[880px]:min-h-[52vh] min-[880px]:flex-col min-[880px]:justify-center min-[880px]:py-0"
+                data-go="1"
+              >
+                <span className="no inline-grid h-[34px] w-[34px] place-items-center rounded-full border-[1.5px] border-[#E4EDF1] bg-white text-[14px] font-extrabold text-[#5E7C88] tabular-nums">
+                  1
+                </span>
+                <h3 className="mt-[13px] mb-2 text-[22px] font-extrabold tracking-[-.5px]">위치 허용, 그걸로 끝</h3>
+                <p className="max-w-[26em] text-[15px] text-[#5E7C88]">
+                  열자마자 현재 위치를 잡고 주변을 스캔해요. 회원가입도, 설치도 없어요. 위치를 켜기 어려우면 동네 이름으로도 찾을 수 있어요.
+                </p>
               </div>
-              <div className="step" data-go="2">
-                <span className="no num">2</span>
-                <h3>지금 운영 중인 곳만, 가까운 순</h3>
-                <p>영업이 끝난 약국은 뒤로 보내고, 지금 갈 수 있는 곳부터 거리순으로 정렬해요. 곧 마감인 곳은 미리 알려드려요.</p>
+              <div
+                className="step mb-1 py-4 min-[880px]:mb-0 min-[880px]:flex min-[880px]:min-h-[52vh] min-[880px]:flex-col min-[880px]:justify-center min-[880px]:py-0"
+                data-go="2"
+              >
+                <span className="no inline-grid h-[34px] w-[34px] place-items-center rounded-full border-[1.5px] border-[#E4EDF1] bg-white text-[14px] font-extrabold text-[#5E7C88] tabular-nums">
+                  2
+                </span>
+                <h3 className="mt-[13px] mb-2 text-[22px] font-extrabold tracking-[-.5px]">지금 운영 중인 곳만, 가까운 순</h3>
+                <p className="max-w-[26em] text-[15px] text-[#5E7C88]">
+                  영업이 끝난 약국은 뒤로 보내고, 지금 갈 수 있는 곳부터 거리순으로 정렬해요. 곧 마감인 곳은 미리 알려드려요.
+                </p>
               </div>
-              <div className="step" data-go="3">
-                <span className="no num">3</span>
-                <h3>누르면 바로 전화 · 길찾기</h3>
-                <p>가까운 약국을 고르면 경로가 그려지고, 전화와 카카오맵 도보 안내가 버튼 하나로 이어져요.</p>
+              <div
+                className="step mb-1 py-4 min-[880px]:mb-0 min-[880px]:flex min-[880px]:min-h-[52vh] min-[880px]:flex-col min-[880px]:justify-center min-[880px]:py-0"
+                data-go="3"
+              >
+                <span className="no inline-grid h-[34px] w-[34px] place-items-center rounded-full border-[1.5px] border-[#E4EDF1] bg-white text-[14px] font-extrabold text-[#5E7C88] tabular-nums">
+                  3
+                </span>
+                <h3 className="mt-[13px] mb-2 text-[22px] font-extrabold tracking-[-.5px]">누르면 바로 전화 · 길찾기</h3>
+                <p className="max-w-[26em] text-[15px] text-[#5E7C88]">
+                  가까운 약국을 고르면 경로가 그려지고, 전화와 카카오맵 도보 안내가 버튼 하나로 이어져요.
+                </p>
               </div>
             </div>
           </div>
@@ -841,23 +939,31 @@ export default function LandingClient() {
       </section>
 
       {/* ================================================================ 신뢰 */}
-      <section className="trust" id="trust">
-        <div className="wrap inner">
+      <section className="border-t border-[#E4EDF1] bg-white py-24" id="trust">
+        <div className={`${WRAP} grid gap-11 min-[880px]:grid-cols-[1.1fr_.9fr] min-[880px]:items-center min-[880px]:gap-[72px]`}>
           <div>
-            <span className="eyebrow" data-reveal>
+            <span className={EYEBROW} data-reveal>
               믿을 수 있는 데이터
             </span>
-            <h2 data-reveal style={{ "--d": ".08s" } as CSSVars}>
+            <h2
+              className="my-[14px] text-[clamp(24px,4vw,36px)] font-extrabold leading-[1.35] tracking-[-.04em] text-balance"
+              data-reveal
+              style={{ "--d": ".08s" } as CSSVars}
+            >
               공공데이터를 기반으로,
               <br />
               매일 새로 확인합니다
             </h2>
-            <p className="lead" data-reveal style={{ "--d": ".16s" } as CSSVars}>
+            <p className="max-w-[30em] text-[16px] text-[#5E7C88]" data-reveal style={{ "--d": ".16s" } as CSSVars}>
               전국 약국의 운영시간 정보는 공공데이터포털의 약국 정보 API를 기반으로 하며, 매일 자동으로 갱신돼요.
               광고나 제휴 순위 없이 오직 거리와 운영 여부로만 정렬합니다.
             </p>
-            <div className="t-note" data-reveal style={{ "--d": ".24s" } as CSSVars}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <div
+              className="mt-[22px] flex gap-[10px] rounded-xl border border-[#E4EDF1] bg-[#f4f8fa] px-4 py-[14px] text-[13.5px] leading-[1.6] text-[#5E7C88]"
+              data-reveal
+              style={{ "--d": ".24s" } as CSSVars}
+            >
+              <svg className="mt-[2px] flex-none text-[#EA9006]" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
                 <path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
               </svg>
               <span>
@@ -866,64 +972,67 @@ export default function LandingClient() {
               </span>
             </div>
           </div>
-          <div className="t-stats" data-reveal style={{ "--d": ".2s" } as CSSVars}>
-            <div className="t-stat">
-              <div className="v num">
+          <div className="grid grid-cols-3 gap-3" data-reveal style={{ "--d": ".2s" } as CSSVars}>
+            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-[18px] py-[22px] text-center">
+              <div className="text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
                 <span data-count="24000">0</span>
-                <small>+</small>
+                <small className="ml-[1px] text-[.55em] font-extrabold">+</small>
               </div>
-              <div className="k">전국 약국 정보</div>
+              <div className="mt-[5px] text-[12.5px] font-bold text-[#5E7C88]">전국 약국 정보</div>
             </div>
-            <div className="t-stat">
-              <div className="v num">
+            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-[18px] py-[22px] text-center">
+              <div className="text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
                 <span data-count="365">0</span>
-                <small>일</small>
+                <small className="ml-[1px] text-[.55em] font-extrabold">일</small>
               </div>
-              <div className="k">매일 자동 갱신</div>
+              <div className="mt-[5px] text-[12.5px] font-bold text-[#5E7C88]">매일 자동 갱신</div>
             </div>
-            <div className="t-stat">
-              <div className="v num">
+            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-[18px] py-[22px] text-center">
+              <div className="text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
                 <span data-count="0">0</span>
-                <small>원</small>
+                <small className="ml-[1px] text-[.55em] font-extrabold">원</small>
               </div>
-              <div className="k">가입 없이 무료</div>
+              <div className="mt-[5px] text-[12.5px] font-bold text-[#5E7C88]">가입 없이 무료</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ================================================================ CTA */}
-      <section className="cta" id="cta">
+      <section className="cta relative overflow-hidden bg-[#0C2A33] pt-[120px] pb-[130px] text-center text-white" id="cta">
         <span className="ring" aria-hidden="true" />
         <span className="ring" aria-hidden="true" />
         <span className="ring" aria-hidden="true" />
-        <div className="wrap">
-          <h2 data-reveal>
+        <div className={WRAP}>
+          <h2 className="relative text-[clamp(28px,5vw,46px)] font-extrabold leading-[1.3] tracking-[-.045em] text-balance" data-reveal>
             다음 급한 밤엔,
             <br />
             헤매지 않도록.
           </h2>
-          <p className="sub" data-reveal style={{ "--d": ".1s" } as CSSVars}>
+          <p className="relative mt-4 mb-8 text-[16.5px] text-[rgba(216,236,241,.75)]" data-reveal style={{ "--d": ".1s" } as CSSVars}>
             설치 없이 웹에서 바로 열려요. 지금 한 번 써보고, 즐겨찾기만 눌러두세요.
           </p>
           <div data-reveal style={{ "--d": ".2s" } as CSSVars}>
-            <Link className="btn btn-primary" href="/">
+            <Link className={`${BTN} ${BTN_PRIMARY} relative px-[34px] py-[18px] text-[17px]`} href="/">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
               지금 문 연 약국 보기
             </Link>
-            <div className="tiny">무료 · 회원가입 없음</div>
+            <div className="relative mt-4 text-[12.5px] font-semibold text-[rgba(255,255,255,.45)]">무료 · 회원가입 없음</div>
           </div>
         </div>
       </section>
 
-      <footer>
-        <div className="wrap">
-          <div className="row">
-            <span className="brand">
-              <span className="logo-mark" aria-hidden="true">
+      <footer className="bg-[#081c23] pt-[34px] pb-11 text-[12.5px] text-[rgba(255,255,255,.55)]">
+        <div className={WRAP}>
+          <div className="flex flex-wrap items-center gap-x-[22px] gap-y-2">
+            <span className="flex items-center gap-2 text-[14px] font-extrabold text-white">
+              <span
+                className="grid h-[26px] w-[26px] flex-none place-items-center rounded-lg bg-[#0B8FAC] shadow-[0_6px_16px_-6px_rgba(11,143,172,.8)]"
+                aria-hidden="true"
+              >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
                   <circle cx="12" cy="10" r="3" />
@@ -933,7 +1042,7 @@ export default function LandingClient() {
             </span>
             <span>© 2026 약국 어디가</span>
           </div>
-          <p>
+          <p className="mt-3 max-w-[56em] leading-[1.7]">
             본 서비스는 공공데이터포털 약국 정보를 기반으로 하며, 의료 행위 또는 약사 상담을 대체하지 않습니다.
             표시된 운영시간은 실제와 다를 수 있으니 방문 전 전화로 확인해 주세요.
           </p>

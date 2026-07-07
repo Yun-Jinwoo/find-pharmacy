@@ -1,11 +1,18 @@
 /* ================================================================
-   약국 어디가 — 랜딩 페이지
-   토큰은 앱(globals.css)과 1:1 동일. 모션 언어도 앱에서 그대로 가져옴:
+   약국 어디가 — 랜딩 페이지 (연출 전용 스타일시트)
+
+   정적 스타일(레이아웃·색·타이포)은 LandingClient.tsx의 Tailwind 유틸리티로,
+   이 파일에는 Tailwind로 표현이 어려운 것만 남긴다:
+   - 키프레임, 시퀀스 딜레이(--pd/--sd/--d), 상태 클래스(.play/.in/data-step) 전환
+   - JS가 className을 통째로 갈아끼우는 badge 시스템
+   - 다층 그라디언트, 조상 상태 → 자손 다수 반응 셀렉터
+
+   모션 언어는 앱과 동일:
    spring = cubic-bezier(0.18,0.9,0.32,1.4)  (핀 드롭/카드 등장)
    out    = cubic-bezier(0.22,0.61,0.36,1)   (슬라이드/페이드)
 
-   전역 앱 스타일과 충돌하지 않도록 모든 선택자를 .lp 아래로 스코프하고
-   키프레임은 lp- 접두사를 붙임. (globals.css의 beat/sonar/spin과 분리)
+   ※ 이 파일은 unlayered라 Tailwind 유틸리티보다 항상 우선한다.
+     여기에 정적 속성을 추가하면 TSX의 유틸리티가 조용히 무시되므로 주의.
    ================================================================ */
 .lp{
   --bg:#E8EFF2; --ink:#0E2A33; --muted:#5E7C88; --line:#E4EDF1; --card:#FFFFFF;
@@ -14,29 +21,25 @@
   --font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
   --spring:cubic-bezier(0.18,0.9,0.32,1.4);
   --out:cubic-bezier(0.22,0.61,0.36,1);
-  --r-btn:11px; --r-card:15px; --r-sheet:26px;
 }
-.lp, .lp *, .lp *::before, .lp *::after{
-  box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-/* body 역할: globals의 body{overflow:hidden} 안에서 자체 스크롤 컨테이너 */
+/* globals의 body{overflow:hidden} 안에서 자체 스크롤 컨테이너 역할 */
 .lp{
   height:100%;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;
   font-family:var(--font);font-size:14px;color:var(--ink);background:var(--map);
   line-height:1.6;-webkit-font-smoothing:antialiased;word-break:keep-all;
+  -webkit-tap-highlight-color:transparent;
 }
+/* 아티팩트 시안과 동일한 렌더링 유지 (svg max-width 캡 포함) */
 .lp img,.lp svg{display:block;max-width:100%}
-.lp button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
-.lp a{color:inherit;text-decoration:none}
 .lp :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
-.lp .wrap{max-width:1100px;margin-inline:auto;padding-inline:20px}
-.lp .num{font-variant-numeric:tabular-nums}
 
 /* ---------- 공통 리빌 (스크롤 진입 시) : 18px 슬라이드업+페이드, 600ms out ---------- */
 .lp [data-reveal]{opacity:0;transform:translateY(18px);
   transition:opacity .6s var(--out) var(--d,0s),transform .6s var(--out) var(--d,0s)}
 .lp [data-reveal].in{opacity:1;transform:none}
 
-/* ---------- 상태 뱃지 (앱과 동일) ---------- */
+/* ---------- 상태 뱃지 ----------
+   JS(setOff)가 className을 "badge closed"로 통째로 갈아끼우므로 CSS로 유지 */
 .lp .badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;
   font-size:11px;font-weight:700;padding:3px 9px;white-space:nowrap}
 .lp .badge .dot{width:6px;height:6px;border-radius:50%;flex:none}
@@ -46,6 +49,7 @@
 .lp .badge.closing .dot{background:var(--closing)}
 .lp .badge.closed{background:#eef2f4;color:var(--closed)}
 .lp .badge.closed .dot{background:var(--closed)}
+.lp .mini-row .badge{font-size:10px;padding:2px 7px}
 @keyframes lpBeat{
   0%{box-shadow:0 0 0 0 rgba(22,163,74,.5)}
   70%{box-shadow:0 0 0 7px rgba(22,163,74,0)}
@@ -53,7 +57,7 @@
 }
 
 /* ---------- 지도 핀 (앱 MapPin과 동일 조형) ---------- */
-.lp .pin{position:absolute;transform:translate(-50%,-100%);transform-origin:bottom center}
+.lp .pin{position:absolute;transform-origin:bottom center}
 .lp .pin-head{width:34px;height:34px;border-radius:50% 50% 50% 3px;transform:rotate(45deg);
   display:grid;place-items:center;box-shadow:0 8px 18px -4px rgba(8,53,66,.6);
   transition:transform .18s var(--spring),outline .15s}
@@ -84,9 +88,6 @@
 /* ================================================================
    HERO — 밤 지도 위 레이더 스캔 → 핀 드롭 → 헤드라인
    ================================================================ */
-.lp .hero{position:relative;min-height:100svh;display:flex;flex-direction:column;
-  background:var(--map);color:#fff;overflow:hidden}
-.lp .hero-map{position:absolute;inset:0;overflow:hidden}
 .lp .hero-map > svg{position:absolute;left:50%;top:50%;width:1400px;height:900px;
   transform:translate(-50%,-50%) scale(1);
   animation:lpMapDrift 26s ease-in-out infinite alternate}
@@ -94,6 +95,7 @@
   from{transform:translate(-50%,-50%) scale(1)}
   to{transform:translate(-51.5%,-48.5%) scale(1.06)}
 }
+/* 다층 그라디언트 장면 연출 — Tailwind arbitrary로는 가독성이 없어 CSS 유지 */
 .lp .hero-shade{position:absolute;inset:0;pointer-events:none;
   background:
     radial-gradient(120% 90% at 50% 8%,rgba(12,42,51,0) 40%,rgba(9,32,40,.55) 100%),
@@ -125,49 +127,21 @@
 .lp.play .pin-tip{opacity:1;transform:translateX(-50%) translateY(0)}
 .lp .pin-tip b{color:var(--accent)}
 
-.lp .logo-mark{width:36px;height:36px;border-radius:11px;background:var(--primary);
-  display:grid;place-items:center;flex:none;
-  box-shadow:0 6px 16px -6px rgba(11,143,172,.8)}
-
-/* 히어로 본문 — 하단 정렬 (스크롤 큐와 여유 확보) */
-.lp .hero-body{position:relative;z-index:5;margin-top:auto;padding:0 0 max(13vh,104px)}
-.lp .clock-chip{display:inline-flex;align-items:center;gap:8px;
-  background:rgba(14,42,51,.72);border:1px solid rgba(34,211,238,.3);
-  backdrop-filter:blur(6px);border-radius:999px;padding:8px 15px;
-  font-size:13.5px;font-weight:700;color:#cfeef5;
-  opacity:0;transform:translateY(14px);
+/* 히어로 진입 시퀀스 — 1.5s 시계 칩 → 1.65s 헤드라인 → 1.8s 서브 → 1.95s CTA */
+.lp .clock-chip{opacity:0;transform:translateY(14px);
   transition:opacity .5s var(--out) 1.5s,transform .5s var(--out) 1.5s}
 .lp.play .clock-chip{opacity:1;transform:none}
 .lp .clock-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--open);
   animation:lpBeat 1.6s ease-out infinite}
-.lp .clock-chip b{color:#fff;font-size:14.5px}
-.lp .hero h1{font-size:clamp(32px,6.4vw,58px);line-height:1.22;font-weight:800;
-  letter-spacing:-.045em;margin:18px 0 14px;text-wrap:balance;
-  opacity:0;transform:translateY(20px);
+.lp .hero h1{opacity:0;transform:translateY(20px);
   transition:opacity .65s var(--out) 1.65s,transform .65s var(--out) 1.65s}
 .lp.play .hero h1{opacity:1;transform:none}
-.lp .hero h1 em{font-style:normal;color:var(--accent)}
-.lp .hero .sub{font-size:clamp(15px,2.2vw,17.5px);color:rgba(223,240,244,.82);
-  max-width:34em;font-weight:500;
-  opacity:0;transform:translateY(20px);
+.lp .hero .sub{opacity:0;transform:translateY(20px);
   transition:opacity .65s var(--out) 1.8s,transform .65s var(--out) 1.8s}
 .lp.play .hero .sub{opacity:1;transform:none}
-.lp .hero-cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:26px;
-  opacity:0;transform:translateY(20px);
+.lp .hero-cta{opacity:0;transform:translateY(20px);
   transition:opacity .65s var(--out) 1.95s,transform .65s var(--out) 1.95s}
 .lp.play .hero-cta{opacity:1;transform:none}
-
-.lp .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  border-radius:var(--r-btn);font-weight:800;font-size:15.5px;
-  padding:15px 26px;letter-spacing:-.2px;
-  transition:transform .18s var(--spring),box-shadow .2s,background .2s}
-.lp .btn:active{transform:scale(.97)}
-.lp .btn-primary{background:var(--primary);color:#fff;
-  box-shadow:0 14px 30px -12px rgba(11,143,172,.75)}
-.lp .btn-primary:hover{background:var(--primary-deep);transform:translateY(-2px);
-  box-shadow:0 18px 34px -12px rgba(11,143,172,.85)}
-.lp .btn-ghost{color:#e6f6fa;border:1.5px solid rgba(255,255,255,.28)}
-.lp .btn-ghost:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
 
 /* 스크롤 큐 */
 .lp .scroll-cue{position:absolute;left:50%;bottom:18px;translate:-50% 0;z-index:5;
@@ -183,101 +157,36 @@
   56%{transform-origin:bottom}to{transform:scaleY(0);transform-origin:bottom}}
 
 /* ================================================================
-   문제 제기 — 아직 밤. 시계가 흐르고, 리스트가 하나씩 꺼진다
+   문제 제기 — 시계가 흐르고, 리스트가 하나씩 꺼진다
    ================================================================ */
-.lp .problem{position:relative;background:linear-gradient(to bottom,#081c23,#0C2A33 30%,#0C2A33);
-  color:#fff;padding:110px 0 120px}
-.lp .problem .grid{display:grid;gap:48px;align-items:center}
-@media(min-width:880px){.lp .problem .grid{grid-template-columns:1.05fr .95fr;gap:64px}}
-.lp .eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;
-  letter-spacing:.16em;color:var(--accent);text-transform:uppercase}
-.lp .eyebrow::before{content:"";width:18px;height:1.5px;background:var(--accent)}
-.lp .problem h2{font-size:clamp(26px,4.6vw,42px);font-weight:800;letter-spacing:-.04em;
-  line-height:1.3;margin:16px 0 18px;text-wrap:balance}
-.lp .problem h2 .num{color:var(--accent)}
-.lp .problem p{color:rgba(214,233,238,.78);font-size:16px;max-width:32em}
-.lp .big-clock{font-size:clamp(56px,9vw,84px);font-weight:800;letter-spacing:-.03em;
-  line-height:1;color:#fff;margin-top:34px;display:flex;flex-direction:column;
-  align-items:flex-start;gap:14px}
-.lp .big-clock small{font-size:17px;font-weight:700;color:var(--closing);
-  letter-spacing:.01em;line-height:1.5}
-.lp .big-clock .colon{animation:lpBlink 1.2s steps(1) infinite}
+.lp .colon{animation:lpBlink 1.2s steps(1) infinite}
 @keyframes lpBlink{50%{opacity:.25}}
 
-/* 하나씩 꺼지는 리스트 */
-.lp .dying-list{background:rgba(10,34,42,.55);border:1px solid rgba(255,255,255,.08);
-  border-radius:var(--r-sheet);padding:22px;backdrop-filter:blur(4px)}
-.lp .dying-list header{display:flex;align-items:center;justify-content:space-between;
-  font-size:13px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:14px}
-.lp .dying-list header .num{color:#fff}
-.lp .d-card{background:#fff;border-radius:var(--r-card);padding:13px 15px;color:var(--ink);
-  display:flex;align-items:center;gap:10px;margin-bottom:9px;
-  transition:opacity .5s var(--out),filter .5s var(--out),transform .55s var(--spring)}
-.lp .d-card:last-child{margin-bottom:0}
-.lp .d-card .name{font-weight:700;font-size:14.5px;letter-spacing:-.3px}
-.lp .d-card .hours{margin-left:auto;font-size:12.5px;color:var(--muted);font-weight:600}
+.lp .d-card{transition:opacity .5s var(--out),filter .5s var(--out),transform .55s var(--spring)}
 .lp .d-card.off{opacity:.38;filter:grayscale(1)}
-.lp .d-card.found{transform:scale(1)}
-.lp .dying-list .d-card.found{border:1.5px solid var(--open);
+.lp .d-card.found{transform:scale(1);border:1.5px solid var(--open);
   box-shadow:0 14px 30px -14px rgba(22,163,74,.55)}
 .lp .d-card.found.pop{animation:lpFoundPop .55s var(--spring)}
 @keyframes lpFoundPop{0%{transform:scale(.94)}100%{transform:scale(1)}}
-.lp .d-card .dist{font-size:14px;font-weight:800;color:var(--primary-deep)}
 
 /* ================================================================
-   기능 — 여기서부터 밝아진다 ("찾았다, 안심")
+   기능 카드 — hover 리프트 + 무대 연출
    ================================================================ */
-.lp .features{background:var(--bg);padding:104px 0 96px;position:relative}
-.lp .features::before{content:"";position:absolute;left:0;right:0;top:0;height:80px;
-  background:linear-gradient(to bottom,#0C2A33,transparent);opacity:.14;pointer-events:none}
-.lp .features .head{max-width:620px;margin-bottom:52px}
-.lp .features h2{font-size:clamp(26px,4.4vw,40px);font-weight:800;letter-spacing:-.04em;
-  line-height:1.32;margin:14px 0 12px;text-wrap:balance}
-.lp .features .head p{color:var(--muted);font-size:16px}
-.lp .f-grid{display:grid;gap:18px}
-@media(min-width:700px){.lp .f-grid{grid-template-columns:1fr 1fr}}
-.lp .f-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
-  padding:26px;overflow:hidden;position:relative;
-  transition:transform .3s var(--spring),box-shadow .3s}
+.lp .f-card{transition:transform .3s var(--spring),box-shadow .3s}
 .lp .f-card:hover{transform:translateY(-4px);box-shadow:0 22px 44px -24px rgba(8,53,66,.35)}
-.lp .f-card h3{font-size:19px;font-weight:800;letter-spacing:-.4px;margin:18px 0 8px}
-.lp .f-card>p{font-size:14.5px;color:var(--muted);line-height:1.65}
-.lp .f-ico{width:44px;height:44px;border-radius:13px;background:rgba(11,143,172,.1);
-  color:var(--primary);display:grid;place-items:center}
 
-/* 데모 무대 (카드 안 상단) */
-.lp .f-stage{height:172px;border-radius:12px;position:relative;overflow:hidden;
-  background:var(--map);margin-bottom:4px}
-.lp .f-stage.light{background:#f2f7f9;border:1px solid var(--line)}
-
-/* ① 지도 데모 */
-.lp .stage-map svg.bgmap{position:absolute;inset:-20%;width:140%;height:140%}
-.lp .stage-map .pin{--pd:0s}
-.lp .stage-map .mini-tip{position:absolute;background:#0e2a33;color:#fff;font-size:11px;
-  font-weight:700;padding:4px 8px;border-radius:7px;white-space:nowrap;
-  transform:translate(-50%,-160%);opacity:0;transition:opacity .3s var(--out) 1.4s}
+/* ① 지도 데모 — 툴팁 지연 등장 */
+.lp .mini-tip{transform:translate(-50%,-160%);opacity:0;transition:opacity .3s var(--out) 1.4s}
 .lp .stage-map.in .mini-tip{opacity:1}
 
-/* ② 필터 데모 */
-.lp .stage-filter{padding:14px;display:flex;flex-direction:column;gap:8px}
-.lp .chips{display:flex;gap:7px}
-.lp .chip{border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:700;
-  background:#fff;border:1px solid var(--line);color:var(--muted);
-  transition:all .25s var(--out)}
+/* ② 필터 데모 — 칩 토글 / 행 숨김 */
+.lp .chip{transition:all .25s var(--out)}
 .lp .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.lp .mini-row{background:#fff;border:1px solid var(--line);border-radius:11px;
-  padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12.5px;
-  font-weight:700;letter-spacing:-.2px;
-  transition:opacity .4s var(--out),transform .4s var(--out)}
-.lp .mini-row .badge{font-size:10px;padding:2px 7px}
-.lp .mini-row .m-dist{margin-left:auto;font-weight:800;color:var(--primary-deep);font-size:12px}
+.lp .mini-row{transition:opacity .4s var(--out),transform .4s var(--out)}
 .lp .mini-row.hide{opacity:.22;transform:scale(.97)}
 
-/* ③ 즐겨찾기 데모 */
-.lp .stage-fav{display:grid;place-items:center}
-.lp .fav-heart{position:relative;width:74px;height:74px;border-radius:50%;background:#fff;
-  border:1px solid var(--line);display:grid;place-items:center;
-  transition:transform .25s var(--spring);cursor:pointer}
+/* ③ 즐겨찾기 데모 — 하트 팝 + 링 + 토스트 */
+.lp .fav-heart{transition:transform .25s var(--spring)}
 .lp .fav-heart:hover{transform:scale(1.08)}
 .lp .fav-heart svg{transition:transform .3s var(--spring)}
 .lp .fav-heart .h-fill{fill:none;stroke:#94a3b8;stroke-width:2;transition:fill .25s,stroke .25s}
@@ -293,8 +202,7 @@
   opacity:0;transform:translateY(6px);transition:opacity .3s var(--out),transform .3s var(--out)}
 .lp .fav-toast.show{opacity:1;transform:none}
 
-/* ④ 길찾기 데모 */
-.lp .stage-route svg.bgmap{position:absolute;inset:-20%;width:140%;height:140%}
+/* ④ 길찾기 데모 — 경로 드로잉 + 도보 라벨 */
 .lp .route-path{fill:none;stroke:var(--accent);stroke-width:3.5;stroke-linecap:round;
   stroke-dasharray:7 8;filter:drop-shadow(0 2px 6px rgba(34,211,238,.5))}
 .lp .route-len{stroke-dashoffset:var(--len);
@@ -307,40 +215,9 @@
 .lp .stage-route.in .walk-label{opacity:1;transform:none}
 
 /* ================================================================
-   데모 — 스크롤 연동 폰
+   폰 데모 — data-step 상태 하나가 화면 전체를 전환
    ================================================================ */
-.lp .demo{background:var(--bg);padding:20px 0 110px}
-.lp .demo-head{max-width:620px;margin-bottom:26px}
-.lp .demo-head h2{font-size:clamp(26px,4.4vw,40px);font-weight:800;letter-spacing:-.04em;
-  line-height:1.32;margin:14px 0 12px}
-.lp .demo-head p{color:var(--muted);font-size:16px}
-.lp .demo-grid{display:grid;gap:8px}
-@media(min-width:880px){
-  .lp .demo-grid{grid-template-columns:1fr 420px;gap:70px;align-items:start}
-  .lp .demo-steps{order:1;padding-top:8vh}
-  .lp .demo-phone-wrap{order:2}
-}
-.lp .demo-phone-wrap{position:sticky;top:12px;z-index:2;display:flex;justify-content:center;
-  padding:8px 0 18px}
-@media(min-width:880px){.lp .demo-phone-wrap{top:calc(50vh - 330px);padding:0}}
-
-/* 폰 프레임 */
-.lp .phone{width:min(310px,78vw);aspect-ratio:310/640;background:#04141a;border-radius:42px;
-  padding:11px;box-shadow:0 34px 70px -30px rgba(8,40,50,.6),0 0 0 1.5px rgba(8,40,50,.18);
-  position:relative}
-.lp .phone::after{content:"";position:absolute;top:22px;left:50%;translate:-50% 0;width:84px;
-  height:24px;background:#04141a;border-radius:999px;z-index:30}
-.lp .screen{position:relative;width:100%;height:100%;border-radius:32px;overflow:hidden;
-  background:var(--map)}
-.lp .screen .bgmap-wrap{position:absolute;inset:0}
-.lp .screen .bgmap-wrap svg{position:absolute;inset:-30% -40%;width:180%;height:160%}
-
-/* 폰 안 요소들 — data-step 상태에 따라 전환 */
-.lp .p-chip{position:absolute;top:56px;left:50%;translate:-50% 0;z-index:20;
-  background:rgba(14,42,51,.85);color:#dff3f8;font-size:11.5px;font-weight:700;
-  padding:7px 13px;border-radius:999px;border:1px solid rgba(34,211,238,.3);
-  white-space:nowrap;display:flex;align-items:center;gap:6px;
-  transition:opacity .35s var(--out)}
+.lp .p-chip{transition:opacity .35s var(--out)}
 .lp .p-chip .spinner{width:11px;height:11px;border-radius:50%;flex:none;
   border:2px solid rgba(34,211,238,.25);border-top-color:var(--accent);
   animation:lpSpin 1s linear infinite}
@@ -348,6 +225,7 @@
 .lp .p-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--open);flex:none;
   animation:lpBeat 1.6s ease-out infinite}
 .lp .p-chip [data-alt]{display:none}
+
 .lp .p-me{position:absolute;left:50%;top:34%;width:13px;height:13px;border-radius:50%;
   background:var(--accent);border:2.5px solid #fff;translate:-50% -50%;z-index:6;
   box-shadow:0 0 0 5px rgba(34,211,238,.22)}
@@ -357,7 +235,6 @@
 .lp [data-step="2"] .p-sonar,.lp [data-step="3"] .p-sonar{animation:none;opacity:0}
 
 .lp .p-pins .pin .pin-head{width:26px;height:26px}
-.lp .p-pins{z-index:6;position:absolute;inset:0}
 .lp [data-step="1"] .p-pins .pin{opacity:0;transform:translate(-50%,-170%) scale(.2)}
 .lp [data-step="2"] .p-pins .pin,.lp [data-step="3"] .p-pins .pin{opacity:1;
   transform:translate(-50%,-100%) scale(1);
@@ -372,77 +249,28 @@
 .lp [data-step="3"] .p-route path{opacity:1;stroke-dashoffset:0;
   transition:stroke-dashoffset 1.2s var(--out) .3s,opacity .2s}
 
-/* 폰 바텀시트 */
-.lp .p-sheet{position:absolute;left:0;right:0;bottom:0;z-index:10;background:#fff;
-  border-radius:var(--r-sheet) var(--r-sheet) 0 0;padding:10px 14px 16px;
-  box-shadow:0 -18px 40px -18px rgba(8,40,50,.45);
-  transform:translateY(105%);transition:transform .6s var(--out)}
+/* 폰 바텀시트 — step2부터 올라옴 */
+.lp .p-sheet{transform:translateY(105%);transition:transform .6s var(--out)}
 .lp [data-step="2"] .p-sheet,.lp [data-step="3"] .p-sheet{transform:translateY(0)}
-.lp .p-sheet .grab{width:44px;height:4px;border-radius:999px;background:#d6e2e8;margin:2px auto 10px}
-.lp .p-sheet h4{font-size:13.5px;font-weight:800;letter-spacing:-.3px;margin-bottom:9px}
-.lp .p-sheet h4 b{color:var(--primary)}
-.lp .p-card{border:1px solid var(--line);border-radius:13px;padding:10px 12px;margin-bottom:8px;
-  transition:border-color .25s,box-shadow .25s}
-.lp .p-card:last-child{margin-bottom:0}
-.lp .p-card .r1{display:flex;align-items:center;gap:7px}
-.lp .p-card .r1 .nm{font-size:13.5px;font-weight:800;letter-spacing:-.3px}
-.lp .p-card .r2{display:flex;align-items:center;justify-content:space-between;margin-top:3px}
-.lp .p-card .hrs{font-size:11.5px;color:#3a5560;font-weight:600}
-.lp .p-card .dst{font-size:13.5px;font-weight:800;color:var(--primary-deep)}
-.lp .p-card .dst small{font-size:10px;color:#9fb3bc;font-weight:600;margin-left:4px}
+.lp .p-card{transition:border-color .25s,box-shadow .25s}
 .lp [data-step="3"] .p-card.first{border-color:var(--primary);
   box-shadow:0 12px 26px -16px rgba(11,143,172,.6)}
-.lp .p-actions{display:flex;gap:7px;margin-top:9px;height:0;opacity:0;overflow:hidden;
+.lp [data-step="3"] .p-card.second{display:none}
+.lp .p-actions{margin-top:9px;height:0;opacity:0;
   transition:height .4s var(--out),opacity .35s var(--out) .15s,margin .4s var(--out)}
 .lp [data-step="3"] .p-actions{height:34px;opacity:1}
 .lp [data-step="1"] .p-actions,.lp [data-step="2"] .p-actions{margin-top:0}
-.lp .p-actions button{flex:1;border-radius:9px;font-size:11.5px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;gap:4px;pointer-events:none}
-.lp .p-actions .call{background:#eef4f6;color:var(--primary-deep)}
-.lp .p-actions .nav{background:var(--primary);color:#fff}
-.lp [data-step="3"] .p-card.second{display:none}
-.lp .p-card.second{display:block}
 
-/* 스텝 텍스트 */
-.lp .step{padding:16px 0;margin-bottom:4px}
-@media(min-width:880px){.lp .step{min-height:52vh;display:flex;flex-direction:column;
-  justify-content:center;padding:0}}
-.lp .step .no{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:999px;
-  background:#fff;border:1.5px solid var(--line);font-size:14px;font-weight:800;
-  color:var(--muted);transition:all .3s var(--out)}
-.lp .step h3{font-size:22px;font-weight:800;letter-spacing:-.5px;margin:13px 0 8px;
-  transition:color .3s}
-.lp .step p{font-size:15px;color:var(--muted);max-width:26em}
+/* 스텝 텍스트 — 현재 스텝만 밝게 */
 .lp .step{opacity:.4;transition:opacity .4s var(--out)}
 .lp .step.on{opacity:1}
+.lp .step .no{transition:all .3s var(--out)}
 .lp .step.on .no{background:var(--primary);border-color:var(--primary);color:#fff;
   box-shadow:0 8px 18px -8px rgba(11,143,172,.8)}
 
 /* ================================================================
-   신뢰 — 공공데이터
+   CTA — 레이더 링
    ================================================================ */
-.lp .trust{background:#fff;border-top:1px solid var(--line);padding:96px 0}
-.lp .trust .inner{display:grid;gap:44px}
-@media(min-width:880px){.lp .trust .inner{grid-template-columns:1.1fr .9fr;gap:72px;align-items:center}}
-.lp .trust h2{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-.04em;
-  line-height:1.35;margin:14px 0 14px;text-wrap:balance}
-.lp .trust .lead{color:var(--muted);font-size:16px;max-width:30em}
-.lp .t-note{margin-top:22px;background:#f4f8fa;border:1px solid var(--line);
-  border-radius:12px;padding:14px 16px;font-size:13.5px;color:var(--muted);
-  display:flex;gap:10px;line-height:1.6}
-.lp .t-note svg{flex:none;margin-top:2px;color:var(--closing)}
-.lp .t-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.lp .t-stat{background:var(--bg);border-radius:var(--r-card);padding:22px 18px;text-align:center}
-.lp .t-stat .v{font-size:clamp(24px,3.6vw,34px);font-weight:800;letter-spacing:-.03em;
-  color:var(--primary-deep)}
-.lp .t-stat .v small{font-size:.55em;font-weight:800;margin-left:1px}
-.lp .t-stat .k{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:5px}
-
-/* ================================================================
-   CTA — 다시 밤, 이번엔 레이더가 켜져 있다
-   ================================================================ */
-.lp .cta{position:relative;background:var(--map);color:#fff;padding:120px 0 130px;
-  overflow:hidden;text-align:center}
 .lp .cta .ring{position:absolute;left:50%;top:50%;border-radius:50%;
   border:1.5px solid rgba(34,211,238,.28);translate:-50% -50%;pointer-events:none}
 .lp .cta.in .ring{animation:lpCtaRing 3.6s var(--out) infinite}
@@ -450,18 +278,6 @@
 .lp .cta .ring:nth-child(3){animation-delay:2.4s}
 @keyframes lpCtaRing{0%{width:90px;height:90px;opacity:.85}
   100%{width:min(860px,120vw);height:min(860px,120vw);opacity:0}}
-.lp .cta h2{font-size:clamp(28px,5vw,46px);font-weight:800;letter-spacing:-.045em;
-  line-height:1.3;position:relative;text-wrap:balance}
-.lp .cta .sub{color:rgba(216,236,241,.75);font-size:16.5px;margin:16px 0 32px;position:relative}
-.lp .cta .btn-primary{font-size:17px;padding:18px 34px;position:relative}
-.lp .cta .tiny{margin-top:16px;font-size:12.5px;color:rgba(255,255,255,.45);
-  font-weight:600;position:relative}
-
-.lp footer{background:#081c23;color:rgba(255,255,255,.55);padding:34px 0 44px;font-size:12.5px}
-.lp footer .row{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center}
-.lp footer .brand{display:flex;align-items:center;gap:8px;font-weight:800;color:#fff;font-size:14px}
-.lp footer .brand .logo-mark{width:26px;height:26px;border-radius:8px}
-.lp footer p{margin-top:12px;line-height:1.7;max-width:56em}
 
 /* ---------- reduced motion : 앱과 동일한 정책 ---------- */
 @media (prefers-reduced-motion:reduce){
