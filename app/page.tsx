@@ -224,6 +224,12 @@ export default function Home() {
     setFilterRadius(opts.radius);
   }
 
+  function handleFilterReset() {
+    setFilterRadius(10);
+    setNightOnly(false);
+    setH24Only(false);
+  }
+
 
   function handleMapMove(lat: number, lng: number, radiusKm: number) {
     setMovedCenter({ lat, lng });
@@ -338,6 +344,7 @@ export default function Home() {
           favorites={favorites}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onResetFilters={handleFilterReset}
           onToggleFavorite={handleToggleFavorite}
           onCardClick={handleCardClick}
           onCardEnter={handleHoverEnter}
@@ -390,6 +397,7 @@ export default function Home() {
         onToggleNight={() => setNightOnly(v => !v)}
         onToggleH24={() => setH24Only(v => !v)}
         onTabChange={setActiveTab}
+        onResetFilters={handleFilterReset}
         onToggleFavorite={handleToggleFavorite}
         onCardClick={handleCardClick}
         onCardEnter={handleHoverEnter}

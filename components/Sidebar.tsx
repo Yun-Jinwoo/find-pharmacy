@@ -22,6 +22,7 @@ interface Props {
   onToggleNight: () => void;
   onToggleH24: () => void;
   onTabChange: (tab: "all" | "favorites") => void;
+  onResetFilters: () => void;
   onToggleFavorite: (id: string) => void;
   onCardClick: (p: Pharmacy) => void;
   onCardEnter: (id: string) => void;
@@ -49,6 +50,7 @@ export default function Sidebar({
   onToggleNight,
   onToggleH24,
   onTabChange,
+  onResetFilters,
   onToggleFavorite,
   onCardClick,
   onCardEnter,
@@ -194,6 +196,22 @@ export default function Sidebar({
                 </svg>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>즐겨찾기한 약국이 없어요</div>
                 <div style={{ fontSize: 12, marginTop: 4 }}>카드의 ♡ 버튼으로 추가하세요</div>
+              </div>
+            ) : pharmacies.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full" style={{ color: "var(--muted)", paddingTop: 40 }}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d3dfe4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M4 4l14 14" />
+                </svg>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>조건에 맞는 약국이 없어요</div>
+                <div style={{ fontSize: 12, marginTop: 4 }}>필터를 초기화하면 더 많은 약국을 볼 수 있어요</div>
+                <button
+                  onClick={onResetFilters}
+                  className="border-0 rounded-full font-bold cursor-pointer"
+                  style={{ fontSize: 12.5, color: "#fff", background: "var(--primary)", padding: "8px 16px", marginTop: 14 }}
+                >
+                  필터 초기화
+                </button>
               </div>
             ) : (
               pharmacies.map((p, i) => (
