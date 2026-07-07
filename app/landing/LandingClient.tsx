@@ -472,8 +472,9 @@ export default function LandingClient() {
           <div className="hero-shade" />
         </div>
 
-        {/* 본문 — 1100px 중앙 컨테이너 대신 풀폭: 넓은 화면에서 왼쪽 가장자리에 붙도록 */}
-        <div className="relative z-[5] mt-auto px-[clamp(20px,4vw,64px)] pb-[max(13vh,104px)]">
+        {/* 본문 — 아래 섹션들과 동일한 1100px 컨테이너
+            (flex 자식은 mx-auto 때문에 콘텐츠 폭으로 줄어들므로 w-full 필수) */}
+        <div className={`${WRAP} relative z-[5] mt-auto w-full pb-[max(13vh,104px)]`}>
           <span className="clock-chip inline-flex items-center gap-2 rounded-full border border-[rgba(34,211,238,.3)] bg-[rgba(14,42,51,.72)] px-[15px] py-2 text-[13.5px] font-bold text-[#cfeef5] backdrop-blur-[6px]">
             <span className="dot" />
             지금 <b className="text-[14.5px] text-white tabular-nums" id="liveClock">밤 9:41</b> · 운영 중인 약국만 표시
