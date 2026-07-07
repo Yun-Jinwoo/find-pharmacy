@@ -905,8 +905,8 @@ export default function LandingClient() {
                 <span className="no inline-grid h-[34px] w-[34px] place-items-center rounded-full border-[1.5px] border-[#E4EDF1] bg-white text-[14px] font-extrabold text-[#5E7C88] tabular-nums">
                   1
                 </span>
-                <h3 className="mt-[13px] mb-2 text-[22px] font-extrabold tracking-[-.5px]">위치 허용, 그걸로 끝</h3>
-                <p className="max-w-[26em] text-[15px] text-[#5E7C88]">
+                <h3 className="mt-[13px] mb-2 text-[26px] font-extrabold tracking-[-.6px]">위치 허용, 그걸로 끝</h3>
+                <p className="max-w-[26em] text-[16.5px] leading-[1.75] text-[#5E7C88]">
                   열자마자 현재 위치를 잡고 주변을 스캔해요. 회원가입도, 설치도 없어요. 위치를 켜기 어려우면 동네 이름으로도 찾을 수 있어요.
                 </p>
               </div>
@@ -917,8 +917,8 @@ export default function LandingClient() {
                 <span className="no inline-grid h-[34px] w-[34px] place-items-center rounded-full border-[1.5px] border-[#E4EDF1] bg-white text-[14px] font-extrabold text-[#5E7C88] tabular-nums">
                   2
                 </span>
-                <h3 className="mt-[13px] mb-2 text-[22px] font-extrabold tracking-[-.5px]">지금 운영 중인 곳만, 가까운 순</h3>
-                <p className="max-w-[26em] text-[15px] text-[#5E7C88]">
+                <h3 className="mt-[13px] mb-2 text-[26px] font-extrabold tracking-[-.6px]">지금 운영 중인 곳만, 가까운 순</h3>
+                <p className="max-w-[26em] text-[16.5px] leading-[1.75] text-[#5E7C88]">
                   영업이 끝난 약국은 뒤로 보내고, 지금 갈 수 있는 곳부터 거리순으로 정렬해요. 곧 마감인 곳은 미리 알려드려요.
                 </p>
               </div>
@@ -929,8 +929,8 @@ export default function LandingClient() {
                 <span className="no inline-grid h-[34px] w-[34px] place-items-center rounded-full border-[1.5px] border-[#E4EDF1] bg-white text-[14px] font-extrabold text-[#5E7C88] tabular-nums">
                   3
                 </span>
-                <h3 className="mt-[13px] mb-2 text-[22px] font-extrabold tracking-[-.5px]">누르면 바로 전화 · 길찾기</h3>
-                <p className="max-w-[26em] text-[15px] text-[#5E7C88]">
+                <h3 className="mt-[13px] mb-2 text-[26px] font-extrabold tracking-[-.6px]">누르면 바로 전화 · 길찾기</h3>
+                <p className="max-w-[26em] text-[16.5px] leading-[1.75] text-[#5E7C88]">
                   가까운 약국을 고르면 경로가 그려지고, 전화와 카카오맵 도보 안내가 버튼 하나로 이어져요.
                 </p>
               </div>
