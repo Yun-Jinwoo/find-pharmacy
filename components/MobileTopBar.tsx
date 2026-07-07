@@ -1,18 +1,19 @@
 "use client";
 
 import { Phase } from "@/app/page";
-
-const CHIPS = ["운영 중", "심야 운영"];
+import NightFilterChips from "./NightFilterChips";
 
 interface Props {
   phase: Phase;
-  activeChip: number;
-  onChipChange: (i: number) => void;
+  nightOnly: boolean;
+  h24Only: boolean;
+  onToggleNight: () => void;
+  onToggleH24: () => void;
   onSearchClick: () => void;
   onFilterClick: () => void;
 }
 
-export default function MobileTopBar({ phase, activeChip, onChipChange, onSearchClick, onFilterClick }: Props) {
+export default function MobileTopBar({ phase, nightOnly, h24Only, onToggleNight, onToggleH24, onSearchClick, onFilterClick }: Props) {
   const shown = phase !== "scan";
 
   return (
@@ -52,27 +53,13 @@ export default function MobileTopBar({ phase, activeChip, onChipChange, onSearch
       </button>
 
       {/* chips */}
-      <div
-        className="flex gap-[8px] mt-[10px] overflow-x-auto pb-[2px]"
-        style={{ scrollbarWidth: "none" } as React.CSSProperties}
-      >
-        {CHIPS.map((label, i) => (
-          <button
-            key={label}
-            onClick={() => onChipChange(i === activeChip ? -1 : i)}
-            className="flex-none border-0 font-semibold rounded-full cursor-pointer whitespace-nowrap"
-            style={{
-              fontSize: 13,
-              padding: "8px 13px",
-              background: i === activeChip ? "#0B8FAC" : "rgba(255,255,255,0.94)",
-              color: i === activeChip ? "#fff" : "#234a55",
-              boxShadow: "0 4px 12px -6px rgba(8,53,66,0.5)",
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <NightFilterChips
+        className="mt-[10px] overflow-x-auto pb-[2px]"
+        nightOnly={nightOnly}
+        h24Only={h24Only}
+        onToggleNight={onToggleNight}
+        onToggleH24={onToggleH24}
+      />
     </div>
   );
 }

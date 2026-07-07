@@ -80,7 +80,8 @@ export default function Home() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [activeChip, setActiveChip] = useState(0);
+  const [nightOnly, setNightOnly] = useState(false);
+  const [h24Only, setH24Only] = useState(false);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -108,14 +109,10 @@ export default function Home() {
     ? pharmacies.find(p => p.id === detailId) ?? null
     : null;
 
-  const NIGHT_CHIP_START_MIN = 22 * 60; // 심야 운영 기준: 오늘 22:00 이후까지 영업
-
   const displayPharmacies = pharmacies.filter(p => {
     if (p.distanceM > filterRadius * 1000) return false;
-    if (isMobile) {
-      if (activeChip === 0 && p.status === "closed") return false;
-      if (activeChip === 1 && p.closeTimeMin < NIGHT_CHIP_START_MIN) return false;
-    }
+    if (h24Only && p.nightBadge !== "24h") return false;
+    if (nightOnly && !p.nightBadge) return false;
     return true;
   });
 
@@ -327,8 +324,10 @@ export default function Home() {
         )}
         <MobileTopBar
           phase={phase}
-          activeChip={activeChip}
-          onChipChange={setActiveChip}
+          nightOnly={nightOnly}
+          h24Only={h24Only}
+          onToggleNight={() => setNightOnly(v => !v)}
+          onToggleH24={() => setH24Only(v => !v)}
           onSearchClick={() => setSearchOpen(true)}
           onFilterClick={() => setFilterOpen(true)}
         />
@@ -386,6 +385,10 @@ export default function Home() {
         activeTab={activeTab}
         regionName={regionName}
         searchOpen={searchOpen}
+        nightOnly={nightOnly}
+        h24Only={h24Only}
+        onToggleNight={() => setNightOnly(v => !v)}
+        onToggleH24={() => setH24Only(v => !v)}
         onTabChange={setActiveTab}
         onToggleFavorite={handleToggleFavorite}
         onCardClick={handleCardClick}

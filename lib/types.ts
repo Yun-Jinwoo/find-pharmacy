@@ -14,6 +14,8 @@ export interface Pharmacy {
   hoursToday: string;
   /** today's closing time in minutes past midnight, -1 if unknown/휴무 */
   closeTimeMin: number;
+  /** "24h" = 실질적으로 하루 종일 운영, "night" = 마감이 22시 이후, null = 해당 없음 */
+  nightBadge: "24h" | "night" | null;
   distanceM: number;
   walkTime: string;
   subText: string;

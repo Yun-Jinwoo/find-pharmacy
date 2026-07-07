@@ -24,6 +24,18 @@ function timeToMin(t: unknown): number {
   return parseInt(s.slice(0, 2)) * 60 + parseInt(s.slice(2, 4));
 }
 
+export const NIGHT_START_MIN = 22 * 60; // 심야 운영 기준: 마감이 22:00 이후
+const H24_SPAN_MIN = 23 * 60; // 문 연 시간이 23시간 이상이면 실질적 24시간 운영으로 간주
+
+function calcNightBadge(startTime: unknown, endTime: unknown): "24h" | "night" | null {
+  const start = timeToMin(startTime);
+  const end = timeToMin(endTime);
+  if (start < 0 || end < 0) return null;
+  if (end - start >= H24_SPAN_MIN) return "24h";
+  if (end >= NIGHT_START_MIN) return "night";
+  return null;
+}
+
 function calcStatus(startTime: unknown, endTime: unknown): PharmacyStatus {
   const start = timeToMin(startTime);
   const end = timeToMin(endTime);
@@ -121,6 +133,7 @@ export async function fetchNearbyPharmacies(lat: number, lng: number, numOfRows 
       statusLabel: status === "open" ? "운영 중" : status === "closing" ? "곧 마감" : "영업 종료",
       hoursToday,
       closeTimeMin: timeToMin(item.endTime),
+      nightBadge: calcNightBadge(item.startTime, item.endTime),
       distanceM: distM,
       walkTime: `도보 ${walkMin}분`,
       subText: String(item.dutyAddr ?? ""),

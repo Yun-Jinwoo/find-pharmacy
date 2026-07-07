@@ -5,6 +5,7 @@ import { Phase } from "@/app/page";
 import PharmacyCard from "./PharmacyCard";
 import DetailPanel from "./DetailPanel";
 import SearchOverlay from "./SearchOverlay";
+import NightFilterChips from "./NightFilterChips";
 
 interface Props {
   pharmacies: Pharmacy[];
@@ -16,6 +17,10 @@ interface Props {
   activeTab: "all" | "favorites";
   regionName: string;
   searchOpen: boolean;
+  nightOnly: boolean;
+  h24Only: boolean;
+  onToggleNight: () => void;
+  onToggleH24: () => void;
   onTabChange: (tab: "all" | "favorites") => void;
   onToggleFavorite: (id: string) => void;
   onCardClick: (p: Pharmacy) => void;
@@ -39,6 +44,10 @@ export default function Sidebar({
   activeTab,
   regionName,
   searchOpen,
+  nightOnly,
+  h24Only,
+  onToggleNight,
+  onToggleH24,
   onTabChange,
   onToggleFavorite,
   onCardClick,
@@ -117,6 +126,15 @@ export default function Sidebar({
               </div>
             </button>
           </div>
+
+          {/* chips */}
+          <NightFilterChips
+            className="mt-[12px] mx-[24px]"
+            nightOnly={nightOnly}
+            h24Only={h24Only}
+            onToggleNight={onToggleNight}
+            onToggleH24={onToggleH24}
+          />
 
           {/* tabs */}
           <div className="flex gap-0 mt-[14px] mx-[24px] border rounded-[12px] overflow-hidden" style={{ borderColor: "var(--line)" }}>

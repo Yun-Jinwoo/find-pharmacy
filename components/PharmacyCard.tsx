@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Pharmacy } from "@/lib/types";
 import { formatDistance } from "@/lib/mockData";
 import StatusBadge from "./StatusBadge";
+import NightBadge from "./NightBadge";
 import { Phase } from "@/app/page";
 import { callPharmacy, navigateTo } from "@/lib/actions";
 
@@ -126,6 +127,7 @@ export default function PharmacyCard({
               {pharmacy.name}
             </span>
             <StatusBadge status={pharmacy.status} label={pharmacy.statusLabel} />
+            {pharmacy.nightBadge && <NightBadge type={pharmacy.nightBadge} />}
           </div>
           <div className="flex items-center justify-between mt-[5px]">
             <span style={{ fontSize: 13, color: "#3a5560" }}>{pharmacy.hoursToday}</span>
@@ -182,6 +184,7 @@ export default function PharmacyCard({
           {pharmacy.name}
         </span>
         <StatusBadge status={pharmacy.status} label={pharmacy.statusLabel} />
+        {pharmacy.nightBadge && <NightBadge type={pharmacy.nightBadge} />}
         {onToggleFavorite && (
           <button
             className="ml-auto border-0 bg-transparent cursor-pointer flex-none p-[4px]"
