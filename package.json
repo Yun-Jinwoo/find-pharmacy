@@ -13,7 +13,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
     "fast-xml-parser": "^5.9.3",
-    "next": "15.3.3",
+    "next": "15.3.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
