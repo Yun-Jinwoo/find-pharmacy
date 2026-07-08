@@ -222,12 +222,12 @@ export default function BottomSheet({
               phase={phase}
               isActive={activeId === p.id}
               isFavorite={favorites.includes(p.id)}
-              onToggleFavorite={() => onToggleFavorite(p.id)}
+              onToggleFavorite={onToggleFavorite}
               showActions
               showToast={showToast}
-              onClick={() => onCardClick(p)}
-              onMouseEnter={() => onCardEnter(p.id)}
-              onMouseLeave={() => onCardLeave(p.id)}
+              onClick={onCardClick}
+              onMouseEnter={onCardEnter}
+              onMouseLeave={onCardLeave}
             />
           ))
         )}

@@ -222,10 +222,10 @@ export default function Sidebar({
                   phase={phase}
                   isActive={activeId === p.id}
                   isFavorite={favorites.includes(p.id)}
-                  onToggleFavorite={() => onToggleFavorite(p.id)}
-                  onClick={() => onCardClick(p)}
-                  onMouseEnter={() => onCardEnter(p.id)}
-                  onMouseLeave={() => onCardLeave(p.id)}
+                  onToggleFavorite={onToggleFavorite}
+                  onClick={onCardClick}
+                  onMouseEnter={onCardEnter}
+                  onMouseLeave={onCardLeave}
                   showToast={showToast}
                 />
               ))

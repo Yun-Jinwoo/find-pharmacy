@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Pharmacy } from "@/lib/types";
 import { MOCK_PHARMACIES } from "@/lib/mockData";
 import { fetchNearbyPharmacies, recalcDistances } from "@/lib/pharmacyApi";
@@ -109,17 +109,23 @@ export default function Home() {
     ? pharmacies.find(p => p.id === detailId) ?? null
     : null;
 
-  const displayPharmacies = pharmacies.filter(p => {
+  const displayPharmacies = useMemo(() => pharmacies.filter(p => {
     if (p.distanceM > filterRadius * 1000) return false;
     if (h24Only && p.nightBadge !== "24h") return false;
     if (nightOnly && !p.nightBadge) return false;
     return true;
-  });
+  }), [pharmacies, filterRadius, h24Only, nightOnly]);
 
-  const favoritePharmacies = pharmacies.filter(p => favorites.includes(p.id));
-  const tabPharmacies = (activeTab === "favorites" ? favoritePharmacies : displayPharmacies)
-    .slice()
-    .sort((a, b) => a.distanceM - b.distanceM);
+  const favoritePharmacies = useMemo(
+    () => pharmacies.filter(p => favorites.includes(p.id)),
+    [pharmacies, favorites],
+  );
+  const tabPharmacies = useMemo(
+    () => (activeTab === "favorites" ? favoritePharmacies : displayPharmacies)
+      .slice()
+      .sort((a, b) => a.distanceM - b.distanceM),
+    [activeTab, favoritePharmacies, displayPharmacies],
+  );
 
   // detect mobile
   useEffect(() => {
@@ -201,18 +207,18 @@ export default function Home() {
     setAppState(s);
   }
 
-  function handleCardClick(p: Pharmacy) {
+  const handleCardClick = useCallback((p: Pharmacy) => {
     setDetailId(p.id);
     setHoveredId(p.id);
-  }
-  function handleDetailClose() {
+  }, []);
+  const handleDetailClose = useCallback(() => {
     setDetailId(null);
     setHoveredId(null);
-  }
-  function handleHoverEnter(id: string) { setHoveredId(id); }
-  function handleHoverLeave(id: string) {
+  }, []);
+  const handleHoverEnter = useCallback((id: string) => { setHoveredId(id); }, []);
+  const handleHoverLeave = useCallback((id: string) => {
     setHoveredId(cur => (cur === id ? null : cur));
-  }
+  }, []);
 
   function handleSearchSelect(p: Pharmacy) {
     setSearchOpen(false);
@@ -220,15 +226,15 @@ export default function Home() {
     setHoveredId(p.id);
   }
 
-  function handleFilterApply(opts: { radius: number }) {
+  const handleFilterApply = useCallback((opts: { radius: number }) => {
     setFilterRadius(opts.radius);
-  }
+  }, []);
 
-  function handleFilterReset() {
+  const handleFilterReset = useCallback(() => {
     setFilterRadius(10);
     setNightOnly(false);
     setH24Only(false);
-  }
+  }, []);
 
 
   function handleMapMove(lat: number, lng: number, radiusKm: number) {
@@ -259,14 +265,14 @@ export default function Home() {
     startScan();
   }
 
-  function handleToggleFavorite(id: string) {
+  const handleToggleFavorite = useCallback((id: string) => {
     setFavorites(prev => {
       const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
       try { localStorage.setItem("pharmacy-favorites", JSON.stringify(next)); }
       catch { /* ignore */ }
       return next;
     });
-  }
+  }, []);
 
   // ── Overlay states ──────────────────────────────────────
   if (appState !== "loaded") {

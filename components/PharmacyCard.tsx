@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { Pharmacy } from "@/lib/types";
 import { formatDistance } from "@/lib/mockData";
 import StatusBadge from "./StatusBadge";
@@ -14,12 +14,12 @@ interface Props {
   isActive: boolean;
   phase: Phase;
   isFavorite?: boolean;
-  onToggleFavorite?: () => void;
+  onToggleFavorite?: (id: string) => void;
   showActions?: boolean;
   showToast?: (msg: string) => void;
-  onClick: () => void;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
+  onClick: (p: Pharmacy) => void;
+  onMouseEnter: (id: string) => void;
+  onMouseLeave: (id: string) => void;
 }
 
 function HeartIcon({ filled }: { filled: boolean }) {
@@ -37,7 +37,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
   );
 }
 
-export default function PharmacyCard({
+function PharmacyCard({
   pharmacy,
   index,
   isActive,
@@ -89,16 +89,16 @@ export default function PharmacyCard({
       <div
         className="relative flex gap-[13px] items-start border rounded-[16px] mb-[11px] cursor-pointer"
         style={{ padding: "14px", ...baseStyle }}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
+        onClick={() => onClick(pharmacy)}
+        onMouseEnter={() => onMouseEnter(pharmacy.id)}
+        onMouseLeave={() => onMouseLeave(pharmacy.id)}
       >
         {/* favorite button — top-right overlay */}
         {onToggleFavorite && (
           <button
             className="absolute border-0 bg-transparent cursor-pointer p-[6px]"
             style={{ top: 8, right: 8 }}
-            onClick={e => { e.stopPropagation(); onToggleFavorite(); }}
+            onClick={e => { e.stopPropagation(); onToggleFavorite(pharmacy.id); }}
           >
             <HeartIcon filled={isFavorite} />
           </button>
@@ -175,9 +175,9 @@ export default function PharmacyCard({
     <div
       className="border rounded-[15px] mb-[10px] cursor-pointer"
       style={{ padding: "14px 15px", ...baseStyle }}
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onClick={() => onClick(pharmacy)}
+      onMouseEnter={() => onMouseEnter(pharmacy.id)}
+      onMouseLeave={() => onMouseLeave(pharmacy.id)}
     >
       <div className="flex items-center gap-[9px]">
         <span className="font-bold tracking-[-0.3px]" style={{ fontSize: 16 }}>
@@ -188,7 +188,7 @@ export default function PharmacyCard({
         {onToggleFavorite && (
           <button
             className="ml-auto border-0 bg-transparent cursor-pointer flex-none p-[4px]"
-            onClick={e => { e.stopPropagation(); onToggleFavorite(); }}
+            onClick={e => { e.stopPropagation(); onToggleFavorite(pharmacy.id); }}
           >
             <HeartIcon filled={isFavorite} />
           </button>
@@ -211,3 +211,5 @@ export default function PharmacyCard({
     </div>
   );
 }
+
+export default memo(PharmacyCard);
