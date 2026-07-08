@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { Pharmacy } from "@/lib/types";
-import { Phase } from "@/app/page";
+import { Phase } from "@/app/map/page";
 import { loadKakaoSdk } from "@/lib/kakaoLoader";
 
 declare global {

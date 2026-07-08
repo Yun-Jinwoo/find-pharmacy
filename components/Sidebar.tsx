@@ -1,7 +1,7 @@
 "use client";
 
 import { Pharmacy } from "@/lib/types";
-import { Phase } from "@/app/page";
+import { Phase } from "@/app/map/page";
 import PharmacyCard from "./PharmacyCard";
 import DetailPanel from "./DetailPanel";
 import SearchOverlay from "./SearchOverlay";

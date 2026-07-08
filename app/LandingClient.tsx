@@ -503,7 +503,7 @@ export default function LandingClient() {
             밤 11시에도, 연휴 한복판에도. 현재 위치에서 지금 운영 중인 약국을 지도에서 바로 확인하세요.
           </p>
           <div className="hero-cta mt-[26px] flex flex-wrap gap-[11px]">
-            <Link className={`${BTN} ${BTN_PRIMARY} px-[26px] py-[15px] text-[15.5px]`} href="/">
+            <Link className={`${BTN} ${BTN_PRIMARY} px-[26px] py-[15px] text-[15.5px]`} href="/map">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 11l19-9-9 19-2-8-8-2Z" />
               </svg>
@@ -1029,7 +1029,7 @@ export default function LandingClient() {
             설치 없이 웹에서 바로 열려요. 지금 한 번 써보고, 즐겨찾기만 눌러두세요.
           </p>
           <div data-reveal style={{ "--d": ".2s" } as CSSVars}>
-            <Link className={`${BTN} ${BTN_PRIMARY} relative px-[34px] py-[18px] text-[17px]`} href="/">
+            <Link className={`${BTN} ${BTN_PRIMARY} relative px-[34px] py-[18px] text-[17px]`} href="/map">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
                 <circle cx="12" cy="10" r="3" />

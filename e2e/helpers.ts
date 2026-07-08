@@ -26,10 +26,10 @@ export async function mockBackend(page: Page) {
   await page.route(/dapi\.kakao\.com/, route => route.abort());
 }
 
-/** 진입 → "위치 허용" → 사이드바 목록이 뜬 상태까지 */
+/** 진입(/map) → "위치 허용" → 사이드바 목록이 뜬 상태까지 */
 export async function enterApp(page: Page) {
   await mockBackend(page);
-  await page.goto("/");
+  await page.goto("/map");
   await page.getByRole("button", { name: "위치 허용" }).click();
   await expect(page.getByRole("heading", { name: /약국/ })).toBeVisible();
 }

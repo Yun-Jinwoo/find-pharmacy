@@ -5,7 +5,7 @@ import { Pharmacy } from "@/lib/types";
 import { formatDistance } from "@/lib/mockData";
 import StatusBadge from "./StatusBadge";
 import NightBadge from "./NightBadge";
-import { Phase } from "@/app/page";
+import { Phase } from "@/app/map/page";
 import { callPharmacy, navigateTo } from "@/lib/actions";
 
 interface Props {

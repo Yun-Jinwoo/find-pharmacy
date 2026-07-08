@@ -1,6 +1,6 @@
 "use client";
 
-import { Phase } from "@/app/page";
+import { Phase } from "@/app/map/page";
 import NightFilterChips from "./NightFilterChips";
 
 interface Props {
