@@ -37,6 +37,14 @@ function HeartIcon({ filled }: { filled: boolean }) {
   );
 }
 
+// 클릭 가능한 카드를 키보드(Enter/Space)로도 실행 가능하게 하는 헬퍼
+function activateOnKey(e: React.KeyboardEvent, fn: () => void) {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    fn();
+  }
+}
+
 function PharmacyCard({
   pharmacy,
   index,
@@ -87,15 +95,20 @@ function PharmacyCard({
   if (showActions) {
     return (
       <div
+        role="button"
+        tabIndex={0}
+        aria-label={`${pharmacy.name}, ${pharmacy.statusLabel}, 상세 정보 보기`}
         className="relative flex gap-[13px] items-start border rounded-[16px] mb-[11px] cursor-pointer"
         style={{ padding: "14px", ...baseStyle }}
         onClick={() => onClick(pharmacy)}
+        onKeyDown={e => activateOnKey(e, () => onClick(pharmacy))}
         onMouseEnter={() => onMouseEnter(pharmacy.id)}
         onMouseLeave={() => onMouseLeave(pharmacy.id)}
       >
         {/* favorite button — top-right overlay */}
         {onToggleFavorite && (
           <button
+            aria-label={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
             className="absolute border-0 bg-transparent cursor-pointer p-[6px]"
             style={{ top: 8, right: 8 }}
             onClick={e => { e.stopPropagation(); onToggleFavorite(pharmacy.id); }}
@@ -173,9 +186,13 @@ function PharmacyCard({
   // ── Desktop card ──
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${pharmacy.name}, ${pharmacy.statusLabel}, 상세 정보 보기`}
       className="border rounded-[15px] mb-[10px] cursor-pointer"
       style={{ padding: "14px 15px", ...baseStyle }}
       onClick={() => onClick(pharmacy)}
+      onKeyDown={e => activateOnKey(e, () => onClick(pharmacy))}
       onMouseEnter={() => onMouseEnter(pharmacy.id)}
       onMouseLeave={() => onMouseLeave(pharmacy.id)}
     >
@@ -187,6 +204,7 @@ function PharmacyCard({
         {pharmacy.nightBadge && <NightBadge type={pharmacy.nightBadge} />}
         {onToggleFavorite && (
           <button
+            aria-label={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
             className="ml-auto border-0 bg-transparent cursor-pointer flex-none p-[4px]"
             onClick={e => { e.stopPropagation(); onToggleFavorite(pharmacy.id); }}
           >

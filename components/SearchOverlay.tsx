@@ -113,9 +113,13 @@ export default function SearchOverlay({ pharmacies, onClose, onSelect, desktop =
             return (
               <div
                 key={p.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${p.name}, ${badge.label}, 선택`}
                 className="flex items-center gap-[10px] cursor-pointer"
                 style={{ padding: "11px 14px", borderRadius: 13, margin: "2px 12px" }}
                 onClick={() => handleSelect(p)}
+                onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelect(p); } }}
               >
                 <div className="grid place-items-center rounded-[12px] flex-none" style={{ width: 40, height: 40, background: "rgba(11,143,172,0.1)", color: "var(--primary)" }}>
                   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

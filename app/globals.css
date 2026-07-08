@@ -22,6 +22,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 키보드 탐색 시에만 표시되는 포커스 표시 (마우스/평상시엔 없음) */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 html,
 body {
   height: 100%;
