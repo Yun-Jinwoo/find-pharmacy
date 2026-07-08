@@ -45,7 +45,7 @@ export default function ErrorScreen({ onRetry }: { onRetry: () => void }) {
           style={{
             padding: "0 40px",
             fontSize: 14.5,
-            background: "linear-gradient(135deg, #0B8FAC, #086B82)",
+            background: "linear-gradient(135deg, #097A96, #086B82)",
             boxShadow: "0 14px 28px -14px rgba(11,143,172,0.9)",
           }}
         >

@@ -61,7 +61,7 @@ export default function LocationPermission({ onAllow, onManual, isLocating = fal
           >
             <path
               d="M12 22s-7.5-6-7.5-12A7.5 7.5 0 0 1 12 2.5 7.5 7.5 0 0 1 19.5 10c0 6-7.5 12-7.5 12Z"
-              fill="#0B8FAC"
+              fill="#097A96"
             />
             <circle cx="12" cy="10" r="3" fill="#fff" />
           </svg>
@@ -87,7 +87,7 @@ export default function LocationPermission({ onAllow, onManual, isLocating = fal
           className="w-full h-[52px] rounded-[13px] border-0 font-extrabold text-white cursor-pointer flex items-center justify-center gap-[8px]"
           style={{
             fontSize: 15.5,
-            background: "linear-gradient(135deg, #0B8FAC, #086B82)",
+            background: "linear-gradient(135deg, #097A96, #086B82)",
             boxShadow: "0 14px 28px -14px rgba(11,143,172,0.9)",
             opacity: isLocating ? 0.8 : 1,
           }}

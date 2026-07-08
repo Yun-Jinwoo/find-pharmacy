@@ -117,7 +117,7 @@ export default function RegionSelect({ onConfirm, onRetry }: Props) {
             className="flex-1 h-[48px] border-0 rounded-[11px] font-extrabold text-white cursor-pointer"
             style={{
               fontSize: 14,
-              background: "linear-gradient(135deg, #0B8FAC, #086B82)",
+              background: "linear-gradient(135deg, #097A96, #086B82)",
               boxShadow: "0 12px 26px -12px rgba(11,143,172,0.8)",
             }}
           >
