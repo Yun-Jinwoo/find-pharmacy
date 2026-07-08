@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Pharmacy } from "@/lib/types";
 import { Phase } from "@/app/page";
 
@@ -159,6 +159,7 @@ export default function MapView({
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<string, any>>(new Map());
   const pinElsRef = useRef<Map<string, HTMLElement>>(new Map());
+  const [mapReady, setMapReady] = useState(false);
   const revealed = phase !== "scan";
   const openCount = pharmacies.filter(p => p.status !== "closed").length;
 
@@ -241,26 +242,9 @@ export default function MapView({
           zIndex: 5,
         }).setMap(map);
 
-        // Pharmacy pin overlays
-        pharmacies.forEach((p) => {
-          const el = makePinEl(p);
-          setPinRevealed(el, false, "0s");
-
-          el.addEventListener("click", () => onPinClick(p));
-          el.addEventListener("mouseenter", () => onPinEnter(p.id));
-          el.addEventListener("mouseleave", () => onPinLeave(p.id));
-
-          const overlay = new window.kakao.maps.CustomOverlay({
-            position: new window.kakao.maps.LatLng(p.lat, p.lng),
-            content: el,
-            xAnchor: 0.5,
-            yAnchor: 1.0,
-            zIndex: 6,
-          });
-          overlay.setMap(map);
-          overlaysRef.current.set(p.id, overlay);
-          pinElsRef.current.set(p.id, el);
-        });
+        // Pharmacy pins are built in a separate effect keyed on `pharmacies`
+        // (the list may arrive after the map mounts — see below).
+        if (mounted) setMapReady(true);
 
         // ── Apply dark theme to tile layer only, inject navy tint ──
         // Runs after a tick so the map has rendered its initial layout.
@@ -296,6 +280,41 @@ export default function MapView({
     return () => { mounted = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // (Re)build pharmacy pins whenever the list changes. The list can arrive
+  // AFTER the map mounts (React Query resolves post-mount), so pins must be
+  // rebuilt reactively — not once at map init. Runs before the phase effect
+  // below, which then applies the reveal state.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map) return;
+
+    // clear previous overlays
+    overlaysRef.current.forEach(o => o.setMap(null));
+    overlaysRef.current.clear();
+    pinElsRef.current.clear();
+
+    pharmacies.forEach((p) => {
+      const el = makePinEl(p);
+      setPinRevealed(el, false, "0s"); // phase effect below reveals
+
+      el.addEventListener("click", () => onPinClick(p));
+      el.addEventListener("mouseenter", () => onPinEnter(p.id));
+      el.addEventListener("mouseleave", () => onPinLeave(p.id));
+
+      const overlay = new window.kakao.maps.CustomOverlay({
+        position: new window.kakao.maps.LatLng(p.lat, p.lng),
+        content: el,
+        xAnchor: 0.5,
+        yAnchor: 1.0,
+        zIndex: 6,
+      });
+      overlay.setMap(map);
+      overlaysRef.current.set(p.id, overlay);
+      pinElsRef.current.set(p.id, el);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pharmacies, mapReady]);
 
   // Show/hide pins when phase changes
   useEffect(() => {
