@@ -16,7 +16,6 @@ import ErrorScreen from "@/components/ErrorScreen";
 import Toast from "@/components/Toast";
 import SearchOverlay from "@/components/SearchOverlay";
 import FilterSheet from "@/components/FilterSheet";
-import DevNav from "@/components/DevNav";
 import { requestLocation, type Coords } from "@/lib/geolocation";
 import { reverseGeocode } from "@/lib/geocoder";
 
@@ -225,15 +224,6 @@ export default function Home() {
     setMovedCenter(null);
   }
 
-  function switchState(s: AppState) {
-    setDetailId(null);
-    setHoveredId(null);
-    if (s === "loaded") {
-      setPhase("scan");
-    }
-    setAppState(s);
-  }
-
   const handleCardClick = useCallback((p: Pharmacy) => {
     setDetailId(p.id);
     setHoveredId(p.id);
@@ -304,9 +294,7 @@ export default function Home() {
         )}
         {appState === "error" && (
           <ErrorScreen onRetry={startScan} />
-        )}
-        <DevNav current={appState} onChange={switchState} />
-      </main>
+        )}      </main>
     );
   }
 
@@ -387,9 +375,7 @@ export default function Home() {
             onClose={() => setFilterOpen(false)}
             onApply={handleFilterApply}
           />
-        )}
-        <DevNav current={appState} onChange={switchState} />
-      </main>
+        )}      </main>
     );
   }
 
@@ -460,8 +446,6 @@ export default function Home() {
             onApply={handleFilterApply}
           />
         </div>
-      )}
-      <DevNav current={appState} onChange={switchState} />
-    </main>
+      )}    </main>
   );
 }
