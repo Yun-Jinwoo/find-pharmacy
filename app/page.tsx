@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Pharmacy } from "@/lib/types";
 import { MOCK_PHARMACIES } from "@/lib/mockData";
 import { fetchNearbyPharmacies, recalcDistances } from "@/lib/pharmacyApi";
@@ -83,7 +84,7 @@ export default function Home() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [nightOnly, setNightOnly] = useState(false);
   const [h24Only, setH24Only] = useState(false);
-  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
+  const [search, setSearch] = useState<{ lat: number; lng: number; numOfRows: number } | null>(null);
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [filterRadius, setFilterRadius] = useState(10);
@@ -104,6 +105,24 @@ export default function Home() {
       if (stored) setFavorites(JSON.parse(stored));
     } catch { /* ignore */ }
   }, []);
+
+  // 주변 약국 목록 — React Query가 검색 좌표(lat/lng/numOfRows)별 캐싱/중복요청 제거.
+  // 같은 지역을 다시 검색하면 캐시에서 즉시 반환된다. 검색 트리거는 setSearch.
+  const pharmaciesQuery = useQuery({
+    queryKey: ["pharmacies", search?.lat, search?.lng, search?.numOfRows],
+    queryFn: () => fetchNearbyPharmacies(search!.lat, search!.lng, search!.numOfRows),
+    enabled: !!search,
+  });
+
+  // 서버 상태(query) → 화면용 파생: 빈 결과/에러 시 MOCK 폴백 + 내 위치 기준 거리 재계산.
+  // (로딩 중엔 빈 배열 — 이 구간은 스캔 연출이 목록/핀을 가림)
+  const pharmacies = useMemo<Pharmacy[]>(() => {
+    let base: Pharmacy[];
+    if (pharmaciesQuery.data) base = pharmaciesQuery.data.length > 0 ? pharmaciesQuery.data : MOCK_PHARMACIES;
+    else if (pharmaciesQuery.isError) base = MOCK_PHARMACIES;
+    else base = [];
+    return userCoords ? recalcDistances(base, userCoords.lat, userCoords.lng) : base;
+  }, [pharmaciesQuery.data, pharmaciesQuery.isError, userCoords]);
 
   const activeId = detailId ?? hoveredId;
   const selectedPharmacy = detailId
@@ -152,24 +171,31 @@ export default function Home() {
     toastTimer.current = setTimeout(() => setToastMsg(null), 2200);
   }, []);
 
+  // 목록 조회 실패 시 안내 (MOCK 폴백은 위 파생 useMemo에서 처리)
+  useEffect(() => {
+    if (pharmaciesQuery.isError) {
+      showToast("약국 데이터를 불러오지 못했어요. 샘플 데이터를 표시합니다.");
+    }
+  }, [pharmaciesQuery.isError, showToast]);
+
   function startScan() {
     setPhase("scan");
     setAppState("loaded");
     setAnimKey(k => k + 1);
   }
 
-  async function loadAndStart(coords: Coords) {
-    setUserCoords(coords);
-    setSearchCenter(coords);
-    try {
-      const data = await fetchNearbyPharmacies(coords.lat, coords.lng);
-      setPharmacies(data.length > 0 ? data : MOCK_PHARMACIES);
-    } catch {
-      setPharmacies(MOCK_PHARMACIES);
-      showToast("약국 데이터를 불러오지 못했어요. 샘플 데이터를 표시합니다.");
-    }
+  // 새 검색 트리거: 쿼리 key(search)를 바꿔 fetch를 유발하고, 동시에 진입 스캔
+  // 연출을 시작한다. fetch 완료를 기다리지 않으므로 연출과 데이터가 분리된다.
+  function beginSearch(center: Coords, numOfRows: number) {
+    setSearch({ lat: center.lat, lng: center.lng, numOfRows });
     setMapKey(k => k + 1);
     startScan();
+  }
+
+  function loadAndStart(coords: Coords) {
+    setUserCoords(coords);
+    setSearchCenter(coords);
+    beginSearch(coords, 50);
     // Reverse geocoding runs after SDK is ready (MapView loads it after startScan)
     reverseGeocode(coords.lat, coords.lng).then(name => {
       if (name) setRegionName(name);
@@ -243,27 +269,13 @@ export default function Home() {
     setViewportRadiusKm(radiusKm);
   }
 
-  async function handleResearch() {
+  function handleResearch() {
     if (!movedCenter) return;
     const center = movedCenter;
+    const numOfRows = Math.min(100, Math.max(50, Math.round(viewportRadiusKm * viewportRadiusKm * 25)));
     setSearchCenter(center);
     setMovedCenter(null);
-
-    const numOfRows = Math.min(100, Math.max(50, Math.round(viewportRadiusKm * viewportRadiusKm * 25)));
-
-    let data: Pharmacy[];
-    try {
-      const raw = await fetchNearbyPharmacies(center.lat, center.lng, numOfRows);
-      const list = raw.length > 0 ? raw : MOCK_PHARMACIES;
-      data = userCoords ? recalcDistances(list, userCoords.lat, userCoords.lng) : list;
-    } catch {
-      data = userCoords ? recalcDistances(MOCK_PHARMACIES, userCoords.lat, userCoords.lng) : MOCK_PHARMACIES;
-      showToast("약국 데이터를 불러오지 못했어요. 샘플 데이터를 표시합니다.");
-    }
-
-    setPharmacies(data);
-    setMapKey(k => k + 1);
-    startScan();
+    beginSearch(center, numOfRows);
   }
 
   const handleToggleFavorite = useCallback((id: string) => {
