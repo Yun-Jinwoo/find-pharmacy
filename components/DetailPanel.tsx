@@ -47,7 +47,7 @@ export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
 
   return (
     <div
-      className={`absolute inset-0 bg-white z-[5] flex flex-col
+      className={`absolute inset-0 bg-white z-[38] flex flex-col
         transition-transform duration-400 ease-[cubic-bezier(0.22,0.61,0.36,1)]
         ${isOpen ? "translate-x-0 visible" : "-translate-x-full invisible"}`}
     >

@@ -7,6 +7,7 @@ import { fetchNearbyPharmacies, recalcDistances } from "@/lib/pharmacyApi";
 import Sidebar from "@/components/Sidebar";
 import MapView from "@/components/MapView";
 import BottomSheet from "@/components/BottomSheet";
+import DetailPanel from "@/components/DetailPanel";
 import MobileTopBar from "@/components/MobileTopBar";
 import LocationPermission from "@/components/LocationPermission";
 import RegionSelect from "@/components/RegionSelect";
@@ -358,6 +359,7 @@ export default function Home() {
           showToast={showToast}
           onExpandChange={setSheetExpanded}
         />
+        <DetailPanel pharmacy={selectedPharmacy} onClose={handleDetailClose} showToast={showToast} />
         <Toast message={toastMsg} />
         {searchOpen && (
           <SearchOverlay
