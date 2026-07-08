@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Pharmacy } from "@/lib/types";
 import { MOCK_PHARMACIES } from "@/lib/mockData";
-import { fetchNearbyPharmacies, recalcDistances } from "@/lib/pharmacyApi";
+import { fetchNearbyPharmacies, recalcDistances, haversineM } from "@/lib/pharmacyApi";
 import Sidebar from "@/components/Sidebar";
 import MapView from "@/components/MapView";
 import BottomSheet from "@/components/BottomSheet";
@@ -21,6 +21,23 @@ import { reverseGeocode } from "@/lib/geocoder";
 
 export type Phase = "scan" | "located" | "listed";
 export type AppState = "permission" | "denied" | "error" | "loaded";
+
+// 이 거리(m) 이상이면 비현실적인 도보 분 대신 "먼 거리"로 표시
+const FAR_DISTANCE_M = 10_000;
+
+// 화면에 보여줄 거리/도보시간을 "내 실제 위치" 기준으로 다시 계산해 덮어쓴다.
+// (리스트 노출 여부를 정하는 반경 필터는 검색 위치 기준 distanceM을 그대로 쓰므로
+// 이 함수는 필터링 이후, 렌더링 직전에만 적용한다 — lib/pharmacyApi.ts의 distance는
+// 건드리지 않음)
+function withRealDistance(list: Pharmacy[], from: Coords): Pharmacy[] {
+  return list.map(p => {
+    const distanceM = Math.round(haversineM(from.lat, from.lng, p.lat, p.lng));
+    const walkTime = distanceM > FAR_DISTANCE_M
+      ? "먼 거리"
+      : `도보 ${Math.max(1, Math.round(distanceM / 67))}분`;
+    return { ...p, distanceM, walkTime };
+  });
+}
 
 // Static dark map background used for overlay screens
 function MapBackground() {
@@ -87,6 +104,9 @@ export default function Home() {
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [filterRadius, setFilterRadius] = useState(10);
+  // 재검색(지도 이동 후 "이 위치에서 재검색")으로 받아온 결과인지 — 재검색 결과는
+  // 반경 필터(1~10km 슬라이더 상한 고정)를 우회해 지도=리스트를 항상 일치시킨다.
+  const [isResearchResult, setIsResearchResult] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
   const [regionName, setRegionName] = useState("");
@@ -113,37 +133,55 @@ export default function Home() {
     enabled: !!search,
   });
 
-  // 서버 상태(query) → 화면용 파생: 빈 결과/에러 시 MOCK 폴백 + 내 위치 기준 거리 재계산.
+  // 서버 상태(query) → 화면용 파생.
+  // 실제 API 데이터는 이미 검색 좌표(search.lat/lng) 기준 정확한 distanceM을 갖고 있으므로
+  // (getParmacyLcinfoInqire가 요청 좌표 기준 distance를 내려줌) 그대로 쓴다.
+  // MOCK 폴백(빈 결과·에러)만 클라이언트에서 거리 계산이 필요한데, 이때도 처음 GPS 위치가
+  // 아니라 "지금 검색 중인 위치"(searchCenter)를 기준으로 삼아야 재검색(지도 이동 후
+  // 다른 동네 조회) 시 반경 필터·거리 표시가 올바르게 그 위치 기준으로 맞춰진다.
   // (로딩 중엔 빈 배열 — 이 구간은 스캔 연출이 목록/핀을 가림)
   const pharmacies = useMemo<Pharmacy[]>(() => {
-    let base: Pharmacy[];
-    if (pharmaciesQuery.data) base = pharmaciesQuery.data.length > 0 ? pharmaciesQuery.data : MOCK_PHARMACIES;
-    else if (pharmaciesQuery.isError) base = MOCK_PHARMACIES;
-    else base = [];
-    return userCoords ? recalcDistances(base, userCoords.lat, userCoords.lng) : base;
-  }, [pharmaciesQuery.data, pharmaciesQuery.isError, userCoords]);
+    if (pharmaciesQuery.data && pharmaciesQuery.data.length > 0) return pharmaciesQuery.data;
+    if (pharmaciesQuery.data || pharmaciesQuery.isError) {
+      return searchCenter ? recalcDistances(MOCK_PHARMACIES, searchCenter.lat, searchCenter.lng) : MOCK_PHARMACIES;
+    }
+    return [];
+  }, [pharmaciesQuery.data, pharmaciesQuery.isError, searchCenter]);
 
   const activeId = detailId ?? hoveredId;
-  const selectedPharmacy = detailId
-    ? pharmacies.find(p => p.id === detailId) ?? null
-    : null;
+  const selectedPharmacy = useMemo(() => {
+    if (!detailId) return null;
+    const p = pharmacies.find(x => x.id === detailId);
+    if (!p) return null;
+    return userCoords ? withRealDistance([p], userCoords)[0] : p;
+  }, [detailId, pharmacies, userCoords]);
 
+  // 반경 필터(1~10km 슬라이더, 상한 고정)는 "내 주변" 최초 탐색에만 적용한다.
+  // 재검색(지도 이동 후 이 위치에서 재검색)은 그 자체가 "이 범위를 보겠다"는
+  // 의사표시이므로 반경 필터를 우회 — 슬라이더 상한(10km)보다 멀리서 재검색해도
+  // 지도에 뜨는 약국이 리스트에서 사라지지 않는다. 야간/24시간 칩은 항상 적용.
   const displayPharmacies = useMemo(() => pharmacies.filter(p => {
-    if (p.distanceM > filterRadius * 1000) return false;
+    if (!isResearchResult && p.distanceM > filterRadius * 1000) return false;
     if (h24Only && p.nightBadge !== "24h") return false;
     if (nightOnly && !p.nightBadge) return false;
     return true;
-  }), [pharmacies, filterRadius, h24Only, nightOnly]);
+  }), [pharmacies, filterRadius, h24Only, nightOnly, isResearchResult]);
 
   const favoritePharmacies = useMemo(
     () => pharmacies.filter(p => favorites.includes(p.id)),
     [pharmacies, favorites],
   );
-  const tabPharmacies = useMemo(
-    () => (activeTab === "favorites" ? favoritePharmacies : displayPharmacies)
-      .slice()
-      .sort((a, b) => a.distanceM - b.distanceM),
-    [activeTab, favoritePharmacies, displayPharmacies],
+  // 실제 카드에 표시할 목록 — 내 실제 위치 기준 거리/도보시간으로 덮어쓴 뒤 그 거리로 정렬.
+  const tabPharmacies = useMemo(() => {
+    const base = activeTab === "favorites" ? favoritePharmacies : displayPharmacies;
+    const withReal = userCoords ? withRealDistance(base, userCoords) : base;
+    return withReal.slice().sort((a, b) => a.distanceM - b.distanceM);
+  }, [activeTab, favoritePharmacies, displayPharmacies, userCoords]);
+
+  // 검색 오버레이용 — 필터와 무관하게 전체 목록을 내 실제 위치 기준 거리로 표시.
+  const pharmaciesForSearch = useMemo(
+    () => (userCoords ? withRealDistance(pharmacies, userCoords) : pharmacies),
+    [pharmacies, userCoords],
   );
 
   // detect mobile
@@ -185,8 +223,9 @@ export default function Home() {
 
   // 새 검색 트리거: 쿼리 key(search)를 바꿔 fetch를 유발하고, 동시에 진입 스캔
   // 연출을 시작한다. fetch 완료를 기다리지 않으므로 연출과 데이터가 분리된다.
-  function beginSearch(center: Coords, numOfRows: number) {
+  function beginSearch(center: Coords, numOfRows: number, isResearch: boolean) {
     setSearch({ lat: center.lat, lng: center.lng, numOfRows });
+    setIsResearchResult(isResearch);
     setMapKey(k => k + 1);
     startScan();
   }
@@ -194,7 +233,7 @@ export default function Home() {
   function loadAndStart(coords: Coords) {
     setUserCoords(coords);
     setSearchCenter(coords);
-    beginSearch(coords, 50);
+    beginSearch(coords, 50, false);
     // Reverse geocoding runs after SDK is ready (MapView loads it after startScan)
     reverseGeocode(coords.lat, coords.lng).then(name => {
       if (name) setRegionName(name);
@@ -265,7 +304,7 @@ export default function Home() {
     const numOfRows = Math.min(100, Math.max(50, Math.round(viewportRadiusKm * viewportRadiusKm * 25)));
     setSearchCenter(center);
     setMovedCenter(null);
-    beginSearch(center, numOfRows);
+    beginSearch(center, numOfRows, true);
   }
 
   const handleToggleFavorite = useCallback((id: string) => {
@@ -364,7 +403,7 @@ export default function Home() {
         <Toast message={toastMsg} />
         {searchOpen && (
           <SearchOverlay
-            pharmacies={pharmacies}
+            pharmacies={pharmaciesForSearch}
             onClose={() => setSearchOpen(false)}
             onSelect={handleSearchSelect}
           />
@@ -391,7 +430,7 @@ export default function Home() {
     >
       <Sidebar
         pharmacies={tabPharmacies}
-        allPharmacies={pharmacies}
+        allPharmacies={pharmaciesForSearch}
         phase={phase}
         activeId={activeId}
         selectedPharmacy={selectedPharmacy}

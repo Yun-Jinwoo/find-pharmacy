@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Pharmacy } from "@/lib/types";
+import { formatDistance } from "@/lib/mockData";
 import StatusBadge from "./StatusBadge";
 import { callPharmacy, navigateTo } from "@/lib/actions";
 import { fetchPharmacyDetail } from "@/lib/pharmacyApi";
@@ -149,7 +150,7 @@ export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
                   </svg>
                 ),
                 label: "거리",
-                value: `${pharmacy.distanceM}m · ${pharmacy.walkTime}`,
+                value: `${formatDistance(pharmacy.distanceM)} · ${pharmacy.walkTime}`,
               },
             ].map((row, i) => (
               <div

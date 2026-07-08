@@ -1,6 +1,6 @@
 import { Pharmacy, PharmacyStatus, DaySchedule } from "./types";
 
-function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
+export function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const f1 = lat1 * Math.PI / 180;
   const f2 = lat2 * Math.PI / 180;
