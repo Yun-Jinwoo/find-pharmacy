@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Pharmacy } from "@/lib/types";
-import { DaySchedule } from "@/lib/types";
 import StatusBadge from "./StatusBadge";
 import { callPharmacy, navigateTo } from "@/lib/actions";
 import { fetchPharmacyDetail } from "@/lib/pharmacyApi";
@@ -23,25 +22,14 @@ export default function DetailPanel({ pharmacy, onClose, showToast }: Props) {
   const isOpen = !!pharmacy;
   const cd = pharmacy ? countdownStyles[pharmacy.countdownType] : countdownStyles[""];
 
-  const cacheRef = useRef<Map<string, DaySchedule[]>>(new Map());
-  const [detailHours, setDetailHours] = useState<DaySchedule[] | null>(null);
-  const [hoursLoading, setHoursLoading] = useState(false);
-
-  useEffect(() => {
-    if (!pharmacy) return;
-    const cached = cacheRef.current.get(pharmacy.id);
-    if (cached) { setDetailHours(cached); return; }
-
-    setDetailHours(null);
-    setHoursLoading(true);
-    fetchPharmacyDetail(pharmacy.id)
-      .then(hours => {
-        cacheRef.current.set(pharmacy.id, hours);
-        setDetailHours(hours);
-      })
-      .catch(() => { /* 실패 시 기본 시간 유지 */ })
-      .finally(() => setHoursLoading(false));
-  }, [pharmacy?.id]);
+  // 상세 요일별 운영시간 — React Query가 hpid별 캐싱/중복요청 제거를 담당.
+  // 같은 약국을 다시 열면 재요청 없이 캐시에서 즉시 표시된다.
+  // (이전엔 useRef Map + 수동 로딩 state + useEffect로 직접 캐싱하던 것을 대체)
+  const { data: detailHours, isLoading: hoursLoading } = useQuery({
+    queryKey: ["pharmacyDetail", pharmacy?.id],
+    queryFn: () => fetchPharmacyDetail(pharmacy!.id),
+    enabled: !!pharmacy,
+  });
 
   const weeklyHours = detailHours ?? pharmacy?.weeklyHours ?? [];
 

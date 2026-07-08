@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.2",
     "fast-xml-parser": "^5.9.3",
     "next": "15.3.3",
     "react": "^19.0.0",
