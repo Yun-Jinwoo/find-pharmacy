@@ -11,3 +11,8 @@ out/
 # misc
 .DS_Store
 *.pem
+
+# playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
