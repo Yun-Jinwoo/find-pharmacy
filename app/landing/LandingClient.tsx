@@ -95,6 +95,8 @@ export default function LandingClient() {
     const root = rootRef.current;
     if (!root) return;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // StrictMode에서 effect가 재실행돼도 리스너가 중복되지 않도록 signal로 일괄 해제
+    const ac = new AbortController();
     const observers: IntersectionObserver[] = [];
     const timeouts: number[] = [];
     const intervals: number[] = [];
@@ -281,14 +283,22 @@ export default function LandingClient() {
         r.classList.toggle("hide", !show);
       });
     }
-    chipN?.addEventListener("click", () => {
-      fmode = "night";
-      applyFilter();
-    });
-    chip24?.addEventListener("click", () => {
-      fmode = "24";
-      applyFilter();
-    });
+    chipN?.addEventListener(
+      "click",
+      () => {
+        fmode = "night";
+        applyFilter();
+      },
+      { signal: ac.signal }
+    );
+    chip24?.addEventListener(
+      "click",
+      () => {
+        fmode = "24";
+        applyFilter();
+      },
+      { signal: ac.signal }
+    );
     applyFilter();
     if (!reduced)
       intervals.push(
@@ -302,16 +312,20 @@ export default function LandingClient() {
     const heart = $("#favHeart");
     const toast = $("#favToast");
     let toastT = 0;
-    heart?.addEventListener("click", () => {
-      const on = heart.classList.toggle("on");
-      if (toast) {
-        toast.textContent = on ? "즐겨찾기에 저장됨" : "즐겨찾기 해제";
-        toast.classList.add("show");
-      }
-      clearTimeout(toastT);
-      toastT = window.setTimeout(() => toast?.classList.remove("show"), 1400);
-      timeouts.push(toastT);
-    });
+    heart?.addEventListener(
+      "click",
+      () => {
+        const on = heart.classList.toggle("on");
+        if (toast) {
+          toast.textContent = on ? "즐겨찾기에 저장됨" : "즐겨찾기 해제";
+          toast.classList.add("show");
+        }
+        clearTimeout(toastT);
+        toastT = window.setTimeout(() => toast?.classList.remove("show"), 1400);
+        timeouts.push(toastT);
+      },
+      { signal: ac.signal }
+    );
     // 뷰포트 진입 1초 후 한 번 자동 시연
     if (heart) {
       const fio = new IntersectionObserver(
@@ -387,6 +401,7 @@ export default function LandingClient() {
     }
 
     return () => {
+      ac.abort();
       observers.forEach((o) => o.disconnect());
       timeouts.forEach((t) => clearTimeout(t));
       intervals.forEach((t) => clearInterval(t));
@@ -941,7 +956,7 @@ export default function LandingClient() {
 
       {/* ================================================================ 신뢰 */}
       <section className="border-t border-[#E4EDF1] bg-white py-24" id="trust">
-        <div className={`${WRAP} grid gap-11 min-[880px]:grid-cols-[1.1fr_.9fr] min-[880px]:items-center min-[880px]:gap-[72px]`}>
+        <div className={`${WRAP} grid gap-11 min-[1080px]:grid-cols-[1.1fr_.9fr] min-[1080px]:items-center min-[1080px]:gap-[72px]`}>
           <div>
             <span className={EYEBROW} data-reveal>
               믿을 수 있는 데이터
@@ -974,22 +989,22 @@ export default function LandingClient() {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3" data-reveal style={{ "--d": ".2s" } as CSSVars}>
-            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-[18px] py-[22px] text-center">
-              <div className="text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
+            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-3 py-[22px] text-center">
+              <div className="text-[clamp(19px,3.6vw,26px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
                 <span data-count="24000">0</span>
                 <small className="ml-[1px] text-[.55em] font-extrabold">+</small>
               </div>
               <div className="mt-[5px] text-[12.5px] font-bold text-[#5E7C88]">전국 약국 정보</div>
             </div>
-            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-[18px] py-[22px] text-center">
-              <div className="text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
+            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-3 py-[22px] text-center">
+              <div className="text-[clamp(19px,3.6vw,26px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
                 <span data-count="365">0</span>
                 <small className="ml-[1px] text-[.55em] font-extrabold">일</small>
               </div>
               <div className="mt-[5px] text-[12.5px] font-bold text-[#5E7C88]">매일 자동 갱신</div>
             </div>
-            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-[18px] py-[22px] text-center">
-              <div className="text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
+            <div className="t-stat rounded-[15px] bg-[#E8EFF2] px-3 py-[22px] text-center">
+              <div className="text-[clamp(19px,3.6vw,26px)] font-extrabold tracking-[-.03em] text-[#086B82] tabular-nums">
                 <span data-count="0">0</span>
                 <small className="ml-[1px] text-[.55em] font-extrabold">원</small>
               </div>
