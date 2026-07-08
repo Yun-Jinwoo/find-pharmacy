@@ -310,6 +310,7 @@ export default function Home() {
           pharmacies={pharmacies}
           phase={phase}
           activeId={activeId}
+          focusId={detailId}
           isMobile
           userLat={userCoords?.lat}
           userLng={userCoords?.lng}
@@ -420,6 +421,7 @@ export default function Home() {
         pharmacies={pharmacies}
         phase={phase}
         activeId={activeId}
+        focusId={detailId}
         userLat={userCoords?.lat}
         userLng={userCoords?.lng}
         initialCenter={searchCenter ?? undefined}

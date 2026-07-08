@@ -13,6 +13,9 @@ interface Props {
   pharmacies: Pharmacy[];
   phase: Phase;
   activeId: string | null;
+  /** 상세 패널이 열린(=클릭으로 확정된) 약국 id. 지정되면 지도가 그 위치로 이동한다.
+   * activeId(hover 포함)와 분리해, 카드에 마우스만 올려도 지도가 움직이는 산만함을 방지. */
+  focusId?: string | null;
   isMobile?: boolean;
   userLat?: number;
   userLng?: number;
@@ -145,6 +148,7 @@ export default function MapView({
   pharmacies,
   phase,
   activeId,
+  focusId,
   isMobile = false,
   userLat,
   userLng,
@@ -327,6 +331,15 @@ export default function MapView({
       overlaysRef.current.get(id)?.setZIndex(id === activeId ? 9 : 6);
     });
   }, [activeId]);
+
+  // Pan the map to the clicked/selected pharmacy (focusId only fires on click,
+  // not hover — see Props comment).
+  useEffect(() => {
+    if (!mapReady || !focusId || !mapRef.current) return;
+    const p = pharmacies.find(p => p.id === focusId);
+    if (!p) return;
+    mapRef.current.panTo(new window.kakao.maps.LatLng(p.lat, p.lng));
+  }, [focusId, mapReady, pharmacies]);
 
   function handleRecenter() {
     const lat = userLat ?? FALLBACK_LAT;
