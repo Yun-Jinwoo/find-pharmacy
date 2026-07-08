@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Pharmacy } from "@/lib/types";
 import { Phase } from "@/app/page";
+import { loadKakaoSdk } from "@/lib/kakaoLoader";
 
 declare global {
   interface Window { kakao: any; }
@@ -264,18 +265,12 @@ export default function MapView({
       }); // kakao.maps.load
     } // startMap
 
-    if (window.kakao?.maps) {
+    loadKakaoSdk().then(() => {
+      // loadKakaoSdk already calls kakao.maps.load internally, so kakao.maps.*
+      // is ready here — startMap's own window.kakao.maps.load() call below
+      // resolves synchronously in that case.
       startMap();
-    } else {
-      let script = document.getElementById("kakao-maps-sdk") as HTMLScriptElement | null;
-      if (!script) {
-        script = document.createElement("script");
-        script.id = "kakao-maps-sdk";
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false&libraries=services`;
-        document.head.appendChild(script);
-      }
-      script.addEventListener("load", startMap);
-    }
+    });
 
     return () => { mounted = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
